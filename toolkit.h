@@ -6,4 +6,6 @@
 using namespace std;
 
 // md5_from_file
-string md5_from_file(const string str);
+// This function calculates the unique md5 hash of a file.
+// path - path of the file.
+string md5_from_file(const string path);
