@@ -36,6 +36,8 @@ public:
 
     void send_file(char *);
 
+    server (){;};
+
     server(int port){
         serv_port = port;
         serv_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -81,7 +83,7 @@ public:
     }
 
     ~server(){
-        close (serv_socket);
+        //close (serv_socket);
     }
     
 };

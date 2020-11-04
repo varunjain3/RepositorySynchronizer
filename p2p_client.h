@@ -24,6 +24,7 @@ private:
     int sock;
 
 public:
+    client (){;};
     client(char *ip, int port){
         serv_port = port;
         serv_ip = ip;
