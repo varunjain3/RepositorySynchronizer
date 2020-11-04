@@ -19,6 +19,8 @@
 int serv_port, client_port;
 class p2p{
 
+private:
+
     server s1;
     client c1; 
     char filepath1[1000];
@@ -26,7 +28,7 @@ class p2p{
 
 public:
 
-    p2p(){ ; };
+    p2p(){ ;}
 
     p2p(int serv_port, int client_port){
         s1 = server(serv_port);
@@ -51,11 +53,13 @@ public:
 
 
 int main(){
+
     cin>>serv_port>>client_port;
     p2p p1 (serv_port, client_port);
     char file1 [1000], file2[1000];
     cin>>file1>>file2;
     p1.file_to_transfer(file1, file2);
     p1.start();
+
     return 0;
 }

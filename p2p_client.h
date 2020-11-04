@@ -1,4 +1,3 @@
-#include <iostream>
 #include <fstream>
 #include <string>
 #include <string.h>
@@ -17,14 +16,18 @@
 using namespace std;
 
 class client{
+
 private:
+
     char *serv_ip;
     in_port_t serv_port;
     sockaddr_in serv_addr;
     int sock;
 
 public:
-    client (){;};
+
+    client (){  ;}
+
     client(char *ip, int port){
         serv_port = port;
         serv_ip = ip;
@@ -46,20 +49,24 @@ public:
 
     }
 
+    void connect2server();
+
     void receive_data(char *);
 
-    void connect2server(){
-        while (1){
-            int t1 = connect(sock, (sockaddr *) &serv_addr, sizeof(serv_addr));
-            if (t1<0){
-                perror("connect error");
-                //sleep(10);
-            }
-            else break;
-        }
-    }
+    ~client(){ ; }
 
 };
+
+void client::connect2server(){
+    while (1){
+        int t1 = connect(sock, (sockaddr *) &serv_addr, sizeof(serv_addr));
+        if (t1<0){
+            perror("connect error");
+            //sleep(10);
+        }
+        else break;
+    }
+}
 
 void client::receive_data(char *filepath){
     //connect2server();

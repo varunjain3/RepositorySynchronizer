@@ -1,4 +1,3 @@
-#include <iostream>
 #include <vector>
 #include <string>
 #include <string.h>
@@ -26,6 +25,7 @@ struct client_details{
 class server{
 
 private:
+
     in_port_t serv_port;
     int serv_socket;
     sockaddr_in serv_addr;
@@ -34,11 +34,11 @@ private:
 
 public:
 
-    void send_file(char *);
 
-    server (){;};
+    server (){  ;}
 
     server(int port){
+
         serv_port = port;
         serv_socket = socket(AF_INET, SOCK_STREAM, 0);
         if (serv_socket<0){
@@ -62,31 +62,37 @@ public:
         if (listen(serv_socket, MAXPENDING)==-1){
             PR("listen error");
         }
-    }
-    void accept_connection(){
 
-        client_details t1;
-        t1.client_addr_len = sizeof(t1.client_addr);
-        t1.client_sock = accept(serv_socket, (sockaddr *) &t1.client_addr, &t1.client_addr_len);
-        if (t1.client_sock<0){
-            PR("accept error");
-        }
-        connected_clients.push_back(t1);
-
-        char client_name[INET_ADDRSTRLEN]; //String to store client's name
-        if (inet_ntop(AF_INET, &t1.client_addr.sin_addr.s_addr, client_name, t1.client_addr_len)!=NULL){
-            cout<<"Handling Client "<<client_name<<" "<<ntohs(t1.client_addr.sin_port)<<endl;
-        }
-        else{
-            cerr<<"Unable to get client address"<<endl;
-        }
     }
+
+    void accept_connection();
+
+    void send_file(char *);
 
     ~server(){
         //close (serv_socket);
     }
     
 };
+
+void server::accept_connection(){
+
+    client_details t1;
+    t1.client_addr_len = sizeof(t1.client_addr);
+    t1.client_sock = accept(serv_socket, (sockaddr *) &t1.client_addr, &t1.client_addr_len);
+    if (t1.client_sock<0){
+        PR("accept error");
+    }
+    connected_clients.push_back(t1);
+
+    char client_name[INET_ADDRSTRLEN]; //String to store client's name
+    if (inet_ntop(AF_INET, &t1.client_addr.sin_addr.s_addr, client_name, t1.client_addr_len)!=NULL){
+        cout<<"Handling Client "<<client_name<<" "<<ntohs(t1.client_addr.sin_port)<<endl;
+    }
+    else{
+        cerr<<"Unable to get client address"<<endl;
+    }
+}
 
 void server::send_file(char *filepath){
     int BUFSIZE = 1;
