@@ -58,24 +58,24 @@ public:
 };
 
 void client::connect2server(){
-    //while (1){
+    while (1){
         int t1 = connect(sock, (sockaddr *) &serv_addr, sizeof(serv_addr));
         if (t1<0){
             perror("connect error");
-            //sleep(10);
+            sleep(1);
         }
-        //else break;
-    //}
+        else break;
+    }
 }
 
 void client::receive_data(char *filepath){
     //connect2server();
 
-    int BUFSIZE = 1;
+    int BUFSIZE = 1024;
     int num_bytes;
     unsigned int rec_len = 0; 
     FILE *fp = fopen(filepath, "w");
-
+    int ct = 0; 
     do{
         cout<<rec_len<<endl;
         char buffer[BUFSIZE+1];
@@ -85,11 +85,18 @@ void client::receive_data(char *filepath){
             return;
         }
         buffer[num_bytes] = '\0';
+        if (strcmp(buffer, "exit")==0){
+            break;
+        }
         rec_len += num_bytes;
         fputs (buffer, fp);
+        ct++;
+        //if (ct>100) break;
 
     }   while (num_bytes>0);
 
+    for (int i=0; i<1000; i++)
+    cout<<"received_finished"<<endl;
 }
 
 

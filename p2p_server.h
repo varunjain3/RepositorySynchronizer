@@ -81,8 +81,8 @@ void server::accept_connection(){
     client_details t1;
     t1.client_addr_len = sizeof(t1.client_addr);
 
-    int flags = fcntl(serv_socket, F_GETFL, 0);
-    fcntl(serv_socket, F_SETFL, flags | O_NONBLOCK);
+    //int flags = fcntl(serv_socket, F_GETFL, 0);
+    //fcntl(serv_socket, F_SETFL, flags | O_NONBLOCK);
 
     t1.client_sock = accept(serv_socket, (sockaddr *) &t1.client_addr, &t1.client_addr_len);
     if (t1.client_sock<0){
@@ -101,7 +101,7 @@ void server::accept_connection(){
 }
 
 void server::send_file(char *filepath){
-    int BUFSIZE = 1;
+    int BUFSIZE = 1024;
     char buffer [BUFSIZE+1];
     for (int i=0; i<connected_clients.size(); i++){
 
@@ -109,7 +109,7 @@ void server::send_file(char *filepath){
         memset(buffer, 0, sizeof(buffer));
         while (fgets(buffer, BUFSIZE+1, fp)){
             ssize_t num_bytes_sent = send(connected_clients[i].client_sock, buffer, strlen(buffer), 0);
-            cout<<strlen(buffer)<<endl;
+            cout<<"Sending in progress..."<<endl;
             if (num_bytes_sent<0){
                 perror("send error");
                 connected_clients.erase(connected_clients.begin() + i);
@@ -122,7 +122,12 @@ void server::send_file(char *filepath){
             memset(buffer, 0, sizeof(buffer));
         }
 
+        strcpy(buffer, "exit");
+        ssize_t num_bytes_sent = send(connected_clients[i].client_sock, buffer, strlen(buffer), 0);
+
     }
+    for (int i=0; i<1000; i++)
+    cout<<"Send finished"<<endl;
 
 }
 

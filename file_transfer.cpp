@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include "p2p_client.h"
 #include "p2p_server.h"
+#include <thread>
 #define PR(s) {\
         perror((s));\
         exit(EXIT_FAILURE); }
@@ -51,10 +52,19 @@ public:
             c1[i].connect2server();
         }
         s1.accept_connection();
-        s1.send_file(filepath1);
+        thread t1 (&server::send_file, s1, filepath1);
+        //s1.send_file(filepath1);
+        thread t2;
         for (int i=0; i<num_foreign_hosts; i++){
-            c1[i].receive_data(filepath2);
+            t2 = thread(&client::receive_data, c1[i], filepath2);
+            //c1[i].receive_data(filepath2);
         }
+        t1.join();
+        for (int i=0; i<1000; i++)
+        cout<<"Thread 1 finished"<<endl;
+        t2.join();
+        for (int i=0; i<1000; i++)
+        cout<<"Thread 2 finished"<<endl;
     } 
 
 };
@@ -64,7 +74,7 @@ int main(){
 
     cin>>serv_port>>client_port;
     vector <pair <char *, int>> foreign_hosts;
-    foreign_hosts.push_back({(char *)"127.0.0.1", 12345});
+    foreign_hosts.push_back({(char *)"172.16.30.31", client_port});
     p2p p1 (serv_port, foreign_hosts);
     char file1 [1000], file2[1000];
     cin>>file1>>file2;
