@@ -1,4 +1,4 @@
-## RepositorySynchornizer
+## Repository Synchronizer
 
 Please check the .h files for documentation and the implementation is in the .cpp files of the same name. to use any function implemented in the .h file, #include "file.h" to import the functions. Thanks.
 
