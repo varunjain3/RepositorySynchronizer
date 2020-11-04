@@ -24,8 +24,10 @@ private:
     int sock;
 
 public:
-    client(serv_ip, serv_port){
-        int sock = socket(AF_INET, SOCK_STREAM, 0); // 0 defaults to TCP using SOCK_STREAM
+    client(char *ip, int port){
+        serv_port = port;
+        serv_ip = ip;
+        sock = socket(AF_INET, SOCK_STREAM, 0); // 0 defaults to TCP using SOCK_STREAM
         if (sock<0)
             PR("socket failed");
 
@@ -47,24 +49,22 @@ public:
 
     void connect2server(){
         while (1){
-            int t1 = connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
+            int t1 = connect(sock, (sockaddr *) &serv_addr, sizeof(serv_addr));
             if (t1<0){
-                sleep(10);
+                perror("connect error");
+                //sleep(10);
             }
             else break;
         }
     }
 
-    ~client(){
-        close (sock);
-    }
-}
+};
 
 void client::receive_data(char *filepath){
     //connect2server();
 
-    int BUFSIZE = 1024;
-
+    int BUFSIZE = 1;
+    int num_bytes;
     unsigned int rec_len = 0; 
     FILE *fp = fopen(filepath, "w");
 
@@ -82,3 +82,14 @@ void client::receive_data(char *filepath){
     }   while (num_bytes>0);
 
 }
+
+
+//int main(){
+
+    //client c1("127.0.0.1", 12345);
+    //c1.connect2server();
+    //char filepath[] = "received/50.txt";
+    //c1.receive_data(filepath);
+
+    //return 0;
+//}
