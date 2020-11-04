@@ -58,14 +58,14 @@ public:
 };
 
 void client::connect2server(){
-    while (1){
+    //while (1){
         int t1 = connect(sock, (sockaddr *) &serv_addr, sizeof(serv_addr));
         if (t1<0){
             perror("connect error");
             //sleep(10);
         }
-        else break;
-    }
+        //else break;
+    //}
 }
 
 void client::receive_data(char *filepath){
@@ -81,7 +81,8 @@ void client::receive_data(char *filepath){
         char buffer[BUFSIZE+1];
         num_bytes = recv(sock, buffer, BUFSIZE, 0); //receives data from the transport layer
         if (num_bytes<0){
-            PR ("recv error");
+            perror ("recv error");
+            return;
         }
         buffer[num_bytes] = '\0';
         rec_len += num_bytes;

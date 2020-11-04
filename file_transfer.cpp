@@ -22,7 +22,8 @@ class p2p{
 private:
 
     server s1;
-    client c1; 
+    int num_foreign_hosts;
+    client c1[5]; 
     char filepath1[1000];
     char filepath2[1000];
 
@@ -30,9 +31,12 @@ public:
 
     p2p(){ ;}
 
-    p2p(int serv_port, int client_port){
+    p2p(int serv_port, vector <pair<char *, int>> foreign_hosts){
+        num_foreign_hosts = foreign_hosts.size();
         s1 = server(serv_port);
-        c1 = client((char *)"127.0.0.1", client_port);
+        for (int i=0; i<foreign_hosts.size(); i++){
+            c1[i] = client(foreign_hosts[i].first, foreign_hosts[i].second);
+        }
     }
 
     void file_to_transfer(char *file1, char *file2){
@@ -43,10 +47,14 @@ public:
     }
 
     void start(){
-        c1.connect2server();
+        for (int i=0; i<num_foreign_hosts; i++){
+            c1[i].connect2server();
+        }
         s1.accept_connection();
         s1.send_file(filepath1);
-        c1.receive_data(filepath2);
+        for (int i=0; i<num_foreign_hosts; i++){
+            c1[i].receive_data(filepath2);
+        }
     } 
 
 };
@@ -55,7 +63,9 @@ public:
 int main(){
 
     cin>>serv_port>>client_port;
-    p2p p1 (serv_port, client_port);
+    vector <pair <char *, int>> foreign_hosts;
+    foreign_hosts.push_back({(char *)"127.0.0.1", 12345});
+    p2p p1 (serv_port, foreign_hosts);
     char file1 [1000], file2[1000];
     cin>>file1>>file2;
     p1.file_to_transfer(file1, file2);

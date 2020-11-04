@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <fcntl.h>
 #define PR(s) {\
         perror((s));\
         exit(EXIT_FAILURE); }
@@ -79,9 +80,14 @@ void server::accept_connection(){
 
     client_details t1;
     t1.client_addr_len = sizeof(t1.client_addr);
+
+    int flags = fcntl(serv_socket, F_GETFL, 0);
+    fcntl(serv_socket, F_SETFL, flags | O_NONBLOCK);
+
     t1.client_sock = accept(serv_socket, (sockaddr *) &t1.client_addr, &t1.client_addr_len);
     if (t1.client_sock<0){
-        PR("accept error");
+        perror("accept error");
+        return;
     }
     connected_clients.push_back(t1);
 
