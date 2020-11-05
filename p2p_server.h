@@ -89,6 +89,11 @@ void server::accept_connection(){
         perror("accept error");
         return;
     }
+    //int enable = 1;
+    //if (setsockopt(t1.client_sock, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(int)) < 0){
+        //PR("setsockopt(TCP_NODELAY) failed");
+    //}
+
     connected_clients.push_back(t1);
 
     char client_name[INET_ADDRSTRLEN]; //String to store client's name
@@ -121,9 +126,12 @@ void server::send_file(char *filepath){
             }
             memset(buffer, 0, sizeof(buffer));
         }
-
-        strcpy(buffer, "exit");
-        ssize_t num_bytes_sent = send(connected_clients[i].client_sock, buffer, strlen(buffer), 0);
+        close(connected_clients[i].client_sock);
+        //for (int j=0; j<1000; j++){
+            //memset(buffer, 0, sizeof(buffer));
+            //strcpy(buffer, "exit");
+            //ssize_t num_bytes_sent = send(connected_clients[i].client_sock, buffer, strlen(buffer), 0);
+        //}
 
     }
     for (int i=0; i<1000; i++)
