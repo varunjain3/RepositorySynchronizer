@@ -2,6 +2,7 @@
 #include <string.h> //for std::string
 #include <fstream>
 #include <map>
+#include <list>
 #include <dirent.h>
 #include <stdio.h>
 #include <sys/stat.h>
@@ -19,6 +20,7 @@ struct filestat
 // Filemap function
 typedef map<string, filestat> filemap;
 typedef pair<string, filestat> fileobject;
+typedef list<string> filelist;
 // Watchdog file watcher
 
 class WatchDog
@@ -26,12 +28,22 @@ class WatchDog
 
 public:
     filemap Log;
+    string rootdir;
     // Constructor, will initialize the Watchdog
-    // WatchDog();
 
-    WatchDog(string path)
+    WatchDog(string path, string dest)
     {
         this->Log = getLog(path);
+        this->rootdir = path;
+        filemap empty;
+
+        filelist add_list = comparelog(this->Log, empty);
+        for (auto itr = add_list.begin(); itr != add_list.end(); itr++)
+        {
+            cout << endl
+                 << "adding file- \t" << *itr;
+            copyFile(this->rootdir, dest, *itr);
+        }
     }
 
     void addkeyvalue(filemap &newlog, string key, filestat value)
@@ -48,8 +60,8 @@ public:
         auto itr = log.find(key);
         if (itr == log.end())
         {
-            cout << "Key not found";
-            return NULL;
+            // cout << "Key not found";
+            return "NotFound";
         }
         else
             return itr->second.hash;
@@ -92,11 +104,14 @@ public:
                 else
                 {
                     tempstat.folder = false;
+                    cout << "\ninside hash checker- " << temp_path << endl;
                     tempstat.hash = md5_from_file(temp_path);
                 }
 
-                cout << temp_path << " " << tempstat.folder << "\t Hash- " << tempstat.hash << endl;
-                addkeyvalue(log, temp_path, tempstat);
+                string new_path = temp_path.substr(temp_path.find("/", 0) + 1, temp_path.length());
+                cout << new_path << " " << tempstat.folder << "\t Hash- " << tempstat.hash << endl;
+
+                addkeyvalue(log, new_path, tempstat);
             }
         }
     }
@@ -105,6 +120,8 @@ public:
     filemap getLog(string path)
     {
         filemap newlog;
+        cout << endl
+             << "Getting Path for " << path << endl;
         iterator(path, newlog);
         return newlog;
     }
@@ -124,16 +141,51 @@ public:
         string SRC = srcfolder + "/" + filename;
         string DEST = destfolder + "/" + filename;
 
-        ifstream src(SRC, ios::binary);
+        // ifstream src(SRC, ios::binary);
+        // ofstream dest(DEST, ios::binary);
+        // dest << src.rdbuf();
+        // return src && dest;
+        ifstream source(SRC, ios::binary);
         ofstream dest(DEST, ios::binary);
-        dest << src.rdbuf();
-        return src && dest;
+
+        istreambuf_iterator<char> begin_source(source);
+        istreambuf_iterator<char> end_source;
+        ostreambuf_iterator<char> begin_dest(dest);
+        copy(begin_source, end_source, begin_dest);
+
+        source.close();
+        dest.close();
     }
 
     // removes files as per given path
-    bool delFile(string path)
+    bool delFile(string dest, string file)
     {
+        string path = dest + "/" + file;
         return (remove(path.c_str()) != 0) ? 0 : 1;
+    }
+
+    filelist comparelog(filemap src, filemap dest)
+    {
+        filelist modified_files;
+
+        for (auto itr = src.begin(); itr != src.end(); itr++)
+        {
+            string hash1, hash2;
+            hash1 = gethash(src, itr->first);
+            hash2 = gethash(dest, itr->first);
+            cout << endl
+                 << itr->first;
+            if (hash1 != hash2)
+            {
+                modified_files.push_back(itr->first);
+            }
+        }
+        return modified_files;
+    }
+
+    void updatelog(filemap log)
+    {
+        this->Log = log;
     }
 };
 
@@ -145,28 +197,86 @@ bool key_compare(Map const &lhs, Map const &rhs)
                                                   [](auto a, auto b) { return a.first == b.first; });
 }
 
+void checkchanges(WatchDog &src, WatchDog &dest)
+{
+
+    filemap currlog;
+    string in;
+    cin >> in;
+    cout << "Root Dir - " << src.rootdir << endl;
+    currlog = src.getLog(src.rootdir);
+
+    filelist del_list = src.comparelog(src.Log, currlog);
+    filelist add_list = src.comparelog(currlog, src.Log);
+
+    for (auto itr = del_list.begin(); itr != del_list.end(); itr++)
+    {
+        cout << endl
+             << "remove file- \t" << *itr;
+        src.delFile(dest.rootdir, *itr);
+    }
+
+    for (auto itr = add_list.begin(); itr != add_list.end(); itr++)
+    {
+        cout << endl
+             << "adding file- \t" << *itr;
+        src.copyFile(src.rootdir, dest.rootdir, *itr);
+    }
+    src.updatelog(currlog);
+    dest.updatelog(currlog);
+};
+
 int main(int argc, char *argv[])
 {
 
     //filestat temp;
     string folder1 = "test1";
-    //string folder2 = "test2";
-    WatchDog g(folder1);
-    filemap a;
-    string in;
-    cin >> in;
-    a = g.getLog(folder1);
+    string folder2 = "test2";
+    WatchDog g(folder1, folder2);
+    WatchDog k(folder2, folder1);
 
-    if (key_compare(a, g.Log))
+    while (true)
     {
-        cout << "Same";
-    }
-    else
-    {
-        cout << "Not Same";
+        string hello;
+        cin >> hello;
+        checkchanges(g, k);
+        checkchanges(k, g);
+        checkchanges(g, k);
+        checkchanges(k, g);
     }
 
-    // a = g.getLog("/home/varun/os/RepositorySynchornizer/test1");
-    cout << endl
-         << folder1 + "/test11/file1.txt \t" << g.gethash(g.Log, folder1 + "/test11/file1.txt") << endl;
+    // filemap a;
+    // string in;
+    // cin >> in;
+    // a = g.getLog(folder1);
+
+    // if (key_compare(a, g.Log))
+    // {
+    //     cout << "Same";
+    // }
+    // else
+    // {
+    //     cout << endl
+    //          << "Not Same" << endl;
+    //     filelist del_list = g.comparelog(g.Log, a);
+    //     filelist add_list = g.comparelog(a, g.Log);
+
+    //     for (auto itr = del_list.begin(); itr != del_list.end(); itr++)
+    //     {
+    //         cout << endl
+    //              << "remove file- \t" << *itr;
+    //         g.delFile(folder2, *itr);
+    //     }
+
+    //     for (auto itr = add_list.begin(); itr != add_list.end(); itr++)
+    //     {
+    //         cout << endl
+    //              << "adding file- \t" << *itr;
+    //         g.copyFile(folder1, folder2, *itr);
+    //     }
+    // }
+
+    // // a = g.getLog("/home/varun/os/RepositorySynchornizer/test1");
+    // cout << endl
+    //      << folder1 + "/test11/file1.txt \t" << g.gethash(g.Log, folder1 + "/test12/file1.txt") << endl;
 }
