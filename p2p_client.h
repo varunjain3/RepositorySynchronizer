@@ -93,7 +93,7 @@ void client::receive_data(char *filepath){
         ct++;
         //if (ct>100) break;
 
-    }   while (num_bytes>0);
+    }   while (rec_len<1434043);
 
     for (int i=0; i<1000; i++)
     cout<<"received_finished"<<endl;

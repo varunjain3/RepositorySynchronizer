@@ -17,7 +17,7 @@
         perror((s));\
         exit(EXIT_FAILURE); }
 
-int serv_port, client_port;
+int serv_port, client_port1, client_port2;
 class p2p{
 
 private:
@@ -52,17 +52,18 @@ public:
             c1[i].connect2server();
         }
         s1.accept_connection();
-        thread t1 (&server::send_file, s1, filepath1);
+        thread t1  = thread(&server::send_file, s1, filepath1);
         //s1.send_file(filepath1);
-        thread t2;
+        thread t2[num_foreign_hosts];
         for (int i=0; i<num_foreign_hosts; i++){
-            t2 = thread(&client::receive_data, c1[i], filepath2);
+            t2[i] = thread(&client::receive_data, c1[i], filepath2);
             //c1[i].receive_data(filepath2);
         }
         t1.join();
         for (int i=0; i<1000; i++)
         cout<<"Thread 1 finished"<<endl;
-        t2.join();
+        for (int i=0; i<num_foreign_hosts; i++)
+            t2[i].join();
         for (int i=0; i<1000; i++)
         cout<<"Thread 2 finished"<<endl;
     } 
@@ -72,12 +73,15 @@ public:
 
 int main(){
 
-    cin>>serv_port>>client_port;
+    cin>>serv_port>>client_port1>>client_port2;
     vector <pair <char *, int>> foreign_hosts;
-    foreign_hosts.push_back({(char *)"172.16.30.31", client_port});
-    p2p p1 (serv_port, foreign_hosts);
+    foreign_hosts.push_back({(char *)"127.0.0.1", client_port1});
+    foreign_hosts.push_back({(char *)"127.0.0.1", client_port2});
+
     char file1 [1000], file2[1000];
     cin>>file1>>file2;
+
+    p2p p1 (serv_port, foreign_hosts);
     p1.file_to_transfer(file1, file2);
     p1.start();
 

@@ -78,30 +78,32 @@ public:
 
 void server::accept_connection(){
 
-    client_details t1;
-    t1.client_addr_len = sizeof(t1.client_addr);
+    for (int i=0; i<2; i++){
+        client_details t1;
+        t1.client_addr_len = sizeof(t1.client_addr);
 
-    //int flags = fcntl(serv_socket, F_GETFL, 0);
-    //fcntl(serv_socket, F_SETFL, flags | O_NONBLOCK);
+        //int flags = fcntl(serv_socket, F_GETFL, 0);
+        //fcntl(serv_socket, F_SETFL, flags | O_NONBLOCK);
 
-    t1.client_sock = accept(serv_socket, (sockaddr *) &t1.client_addr, &t1.client_addr_len);
-    if (t1.client_sock<0){
-        perror("accept error");
-        return;
-    }
-    //int enable = 1;
-    //if (setsockopt(t1.client_sock, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(int)) < 0){
-        //PR("setsockopt(TCP_NODELAY) failed");
-    //}
+        t1.client_sock = accept(serv_socket, (sockaddr *) &t1.client_addr, &t1.client_addr_len);
+        if (t1.client_sock<0){
+            perror("accept error");
+            return;
+        }
+        //int enable = 1;
+        //if (setsockopt(t1.client_sock, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(int)) < 0){
+            //PR("setsockopt(TCP_NODELAY) failed");
+        //}
 
-    connected_clients.push_back(t1);
+        connected_clients.push_back(t1);
 
-    char client_name[INET_ADDRSTRLEN]; //String to store client's name
-    if (inet_ntop(AF_INET, &t1.client_addr.sin_addr.s_addr, client_name, t1.client_addr_len)!=NULL){
-        cout<<"Handling Client "<<client_name<<" "<<ntohs(t1.client_addr.sin_port)<<endl;
-    }
-    else{
-        cerr<<"Unable to get client address"<<endl;
+        char client_name[INET_ADDRSTRLEN]; //String to store client's name
+        if (inet_ntop(AF_INET, &t1.client_addr.sin_addr.s_addr, client_name, t1.client_addr_len)!=NULL){
+            cout<<"Handling Client "<<client_name<<" "<<ntohs(t1.client_addr.sin_port)<<endl;
+        }
+        else{
+            cerr<<"Unable to get client address"<<endl;
+        }
     }
 }
 
@@ -126,7 +128,7 @@ void server::send_file(char *filepath){
             }
             memset(buffer, 0, sizeof(buffer));
         }
-        close(connected_clients[i].client_sock);
+        //close(connected_clients[i].client_sock);
         //for (int j=0; j<1000; j++){
             //memset(buffer, 0, sizeof(buffer));
             //strcpy(buffer, "exit");
