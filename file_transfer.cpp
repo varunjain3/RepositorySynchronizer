@@ -71,15 +71,15 @@ public:
 };
 
 
-int main(){
+int main(int argc, char * argv[]){
 
-    cin>>serv_port>>client_port1>>client_port2;
+    serv_port = atoi(argv[1]); client_port1 = atoi(argv[2]); client_port2 = atoi(argv[3]);
     vector <pair <char *, int>> foreign_hosts;
     foreign_hosts.push_back({(char *)"127.0.0.1", client_port1});
     foreign_hosts.push_back({(char *)"127.0.0.1", client_port2});
 
-    char file1 [1000], file2[1000];
-    cin>>file1>>file2;
+    char *file1 = argv[4];
+    char *file2 = argv[5];
 
     p2p p1 (serv_port, foreign_hosts);
     p1.file_to_transfer(file1, file2);
