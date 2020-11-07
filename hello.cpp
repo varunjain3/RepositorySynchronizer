@@ -37,7 +37,10 @@ public:
         this->rootdir = path;
         filemap empty;
 
-        filelist add_list = comparelog(this->Log, empty);
+        pair<filelist, filelist> adds = comparelog(this->Log, empty);
+        filelist add_list = adds.first;
+        filelist add_folder = adds.second;
+
         for (auto itr = add_list.begin(); itr != add_list.end(); itr++)
         {
             cout << endl
@@ -104,7 +107,7 @@ public:
                 else
                 {
                     tempstat.folder = false;
-                    cout << "\ninside hash checker- " << temp_path << endl;
+                    // cout << "\ninside hash checker- " << temp_path << endl;
                     tempstat.hash = md5_from_file(temp_path);
                 }
 
@@ -121,7 +124,7 @@ public:
     {
         filemap newlog;
         cout << endl
-             << "Getting Path for " << path << endl;
+             << "Getting Log for " << path << endl;
         iterator(path, newlog);
         return newlog;
     }
@@ -141,10 +144,27 @@ public:
         string SRC = srcfolder + "/" + filename;
         string DEST = destfolder + "/" + filename;
 
-        // ifstream src(SRC, ios::binary);
-        // ofstream dest(DEST, ios::binary);
-        // dest << src.rdbuf();
-        // return src && dest;
+        // Make Directories
+
+        string parent = DEST.substr(0, DEST.find_last_of("/"));
+        string command = "mkdir -p " + parent;
+        cout << "\nParent - " << parent << "\tCommand - " << (char *)command.c_str();
+        system((char *)command.c_str());
+
+        // size_t prev = 0,
+        //        pos = 0;
+        // do
+        // {
+        //     pos = filename.find(delim, prev);
+        //     if (pos == string::npos)
+        //         pos = str.length();
+        //     string token = str.substr(prev, pos - prev);
+        //     if (!token.empty())
+        //         tokens.push_back(token);
+        //     prev = pos + delim.length();
+        // }
+
+        // Actuall Copying
         ifstream source(SRC, ios::binary);
         ofstream dest(DEST, ios::binary);
 
@@ -164,9 +184,10 @@ public:
         return (remove(path.c_str()) != 0) ? 0 : 1;
     }
 
-    filelist comparelog(filemap src, filemap dest)
+    pair<filelist, filelist> comparelog(filemap src, filemap dest)
     {
         filelist modified_files;
+        filelist modified_folders;
 
         for (auto itr = src.begin(); itr != src.end(); itr++)
         {
@@ -177,10 +198,15 @@ public:
                  << itr->first;
             if (hash1 != hash2)
             {
-                modified_files.push_back(itr->first);
+                if (itr->second.folder == false)
+                    modified_files.push_back(itr->first);
+                else
+                {
+                    modified_folders.push_back(itr->first);
+                }
             }
         }
-        return modified_files;
+        return make_pair(modified_files, modified_folders);
     }
 
     void updatelog(filemap log)
@@ -206,8 +232,13 @@ void checkchanges(WatchDog &src, WatchDog &dest)
     cout << "Root Dir - " << src.rootdir << endl;
     currlog = src.getLog(src.rootdir);
 
-    filelist del_list = src.comparelog(src.Log, currlog);
-    filelist add_list = src.comparelog(currlog, src.Log);
+    pair<filelist, filelist> dels = src.comparelog(src.Log, currlog);
+    filelist del_list = dels.first;
+    filelist del_folder = dels.second;
+
+    pair<filelist, filelist> adds = src.comparelog(currlog, src.Log);
+    filelist add_list = adds.first;
+    filelist add_folder = adds.second;
 
     for (auto itr = del_list.begin(); itr != del_list.end(); itr++)
     {
@@ -222,6 +253,22 @@ void checkchanges(WatchDog &src, WatchDog &dest)
              << "adding file- \t" << *itr;
         src.copyFile(src.rootdir, dest.rootdir, *itr);
     }
+
+    for (auto itr = del_folder.begin(); itr != del_folder.end(); itr++)
+    {
+        string command = "rm -r " + dest.rootdir + "/" + *itr;
+        cout << "\nDeleting folder... " << command;
+        system((char *)command.c_str());
+    }
+
+    for (auto itr = add_folder.begin(); itr != add_folder.end(); itr++)
+    {
+        string command = "mkdir -p " + dest.rootdir + "/" + *itr;
+        cout << "\nAdding folder... " << command;
+        system((char *)command.c_str());
+    }
+
+    
     src.updatelog(currlog);
     dest.updatelog(currlog);
 };
@@ -237,46 +284,9 @@ int main(int argc, char *argv[])
 
     while (true)
     {
-        string hello;
+        char hello;
         cin >> hello;
         checkchanges(g, k);
         checkchanges(k, g);
-        checkchanges(g, k);
-        checkchanges(k, g);
     }
-
-    // filemap a;
-    // string in;
-    // cin >> in;
-    // a = g.getLog(folder1);
-
-    // if (key_compare(a, g.Log))
-    // {
-    //     cout << "Same";
-    // }
-    // else
-    // {
-    //     cout << endl
-    //          << "Not Same" << endl;
-    //     filelist del_list = g.comparelog(g.Log, a);
-    //     filelist add_list = g.comparelog(a, g.Log);
-
-    //     for (auto itr = del_list.begin(); itr != del_list.end(); itr++)
-    //     {
-    //         cout << endl
-    //              << "remove file- \t" << *itr;
-    //         g.delFile(folder2, *itr);
-    //     }
-
-    //     for (auto itr = add_list.begin(); itr != add_list.end(); itr++)
-    //     {
-    //         cout << endl
-    //              << "adding file- \t" << *itr;
-    //         g.copyFile(folder1, folder2, *itr);
-    //     }
-    // }
-
-    // // a = g.getLog("/home/varun/os/RepositorySynchornizer/test1");
-    // cout << endl
-    //      << folder1 + "/test11/file1.txt \t" << g.gethash(g.Log, folder1 + "/test12/file1.txt") << endl;
 }
