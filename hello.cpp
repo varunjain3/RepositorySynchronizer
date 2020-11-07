@@ -4,6 +4,7 @@
 #include <map>
 #include <list>
 #include <dirent.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include "toolkit.h"
@@ -227,8 +228,6 @@ void checkchanges(WatchDog &src, WatchDog &dest)
 {
 
     filemap currlog;
-    string in;
-    cin >> in;
     cout << "Root Dir - " << src.rootdir << endl;
     currlog = src.getLog(src.rootdir);
 
@@ -268,7 +267,6 @@ void checkchanges(WatchDog &src, WatchDog &dest)
         system((char *)command.c_str());
     }
 
-    
     src.updatelog(currlog);
     dest.updatelog(currlog);
 };
@@ -284,8 +282,9 @@ int main(int argc, char *argv[])
 
     while (true)
     {
-        char hello;
-        cin >> hello;
+        // char hello;
+        // cin >> hello;
+        sleep(atoi(argv[1]));
         checkchanges(g, k);
         checkchanges(k, g);
     }
