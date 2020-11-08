@@ -68,11 +68,24 @@ void client::connect2server(){
     }
 }
 
-void client::receive_data(char *filepath){
+void client::receive_data(char * save_folder){
     //connect2server();
 
-    int BUFSIZE = 1024;
-    int num_bytes;
+    int BUFSIZE = 1024, num_bytes = 0, FileSize = 0;
+    char *filepath, file_desc[1024]; 
+
+    num_bytes = recv(sock, file_desc, 1024, 0); 
+    if (num_bytes<0){   perror ("recv error");  return; }
+    
+    cout<<file_desc<<endl;
+    filepath = strtok(file_desc, "|");
+    FileSize = atoi (strtok(NULL, "|"));
+    
+    char filepath_temp [1024];
+    strcpy(filepath_temp, save_folder);
+    strcat(filepath_temp, filepath);
+    filepath = filepath_temp;
+
     unsigned int rec_len = 0; 
     FILE *fp = fopen(filepath, "w");
     int ct = 0; 
@@ -80,20 +93,16 @@ void client::receive_data(char *filepath){
         cout<<rec_len<<endl;
         char buffer[BUFSIZE+1];
         num_bytes = recv(sock, buffer, BUFSIZE, 0); //receives data from the transport layer
-        if (num_bytes<0){
-            perror ("recv error");
-            return;
-        }
+        if (num_bytes<0){   perror ("recv error");  return; }
+
         buffer[num_bytes] = '\0';
-        if (strcmp(buffer, "exit")==0){
-            break;
-        }
+
         rec_len += num_bytes;
         fputs (buffer, fp);
         ct++;
         //if (ct>100) break;
 
-    }   while (rec_len<1434043);
+    }   while (rec_len<FileSize);
 
     for (int i=0; i<1000; i++)
     cout<<"received_finished"<<endl;

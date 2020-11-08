@@ -25,8 +25,8 @@ private:
     server s1;
     int num_foreign_hosts;
     client c1[5]; 
-    char filepath1[1000];
-    char filepath2[1000];
+    char filepath1[1024];
+    char save_folder[1024];
 
 public:
 
@@ -43,8 +43,7 @@ public:
     void file_to_transfer(char *file1, char *file2){
         strcpy(filepath1, "books/");
         strcat(filepath1, file1);
-        strcpy(filepath2, "received/");
-        strcat(filepath2, file2);
+        strcpy(save_folder, file2);
     }
 
     void start(){
@@ -56,7 +55,7 @@ public:
         //s1.send_file(filepath1);
         thread t2[num_foreign_hosts];
         for (int i=0; i<num_foreign_hosts; i++){
-            t2[i] = thread(&client::receive_data, c1[i], filepath2);
+            t2[i] = thread(&client::receive_data, c1[i], save_folder);
             //c1[i].receive_data(filepath2);
         }
         t1.join();
@@ -79,10 +78,10 @@ int main(int argc, char * argv[]){
     foreign_hosts.push_back({(char *)"127.0.0.1", client_port2});
 
     char *file1 = argv[4];
-    char *file2 = argv[5];
+    char *save_folder = argv[5];
 
     p2p p1 (serv_port, foreign_hosts);
-    p1.file_to_transfer(file1, file2);
+    p1.file_to_transfer(file1, save_folder);
     p1.start();
 
     return 0;

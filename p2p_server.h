@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "utils.h"
 #define PR(s) {\
         perror((s));\
         exit(EXIT_FAILURE); }
@@ -70,6 +71,8 @@ public:
 
     void send_file(char *);
 
+    int check_correctsend(int , int , int);
+
     ~server(){
         //close (serv_socket);
     }
@@ -110,22 +113,29 @@ void server::accept_connection(){
 void server::send_file(char *filepath){
     int BUFSIZE = 1024;
     char buffer [BUFSIZE+1];
+    int file_size = get_filesize(filepath);
+
+    char file_desc [1024] = "";
+    strcpy(file_desc, filepath);
+    strcat(file_desc, "|");
+    strcat(file_desc, to_string(file_size).c_str());
+
+
     for (int i=0; i<connected_clients.size(); i++){
+
+
+        ssize_t num_bytes_sent = 0;
+        num_bytes_sent = send(connected_clients[i].client_sock, file_desc, 1024, 0); 
+        if (check_correctsend(num_bytes_sent, 1024, i) == 0) continue;
 
         FILE *fp = fopen(filepath, "r");
         memset(buffer, 0, sizeof(buffer));
         while (fgets(buffer, BUFSIZE+1, fp)){
-            ssize_t num_bytes_sent = send(connected_clients[i].client_sock, buffer, strlen(buffer), 0);
+
+            num_bytes_sent = send(connected_clients[i].client_sock, buffer, strlen(buffer), 0);
             cout<<"Sending in progress..."<<endl;
-            if (num_bytes_sent<0){
-                perror("send error");
-                connected_clients.erase(connected_clients.begin() + i);
-                break;
-            }
-            else if (num_bytes_sent!=strlen(buffer)){
-                cerr<<"send() sent incorrect number of bytes"<<endl;
-                exit(1);
-            }
+            if (check_correctsend(num_bytes_sent, strlen(buffer), i) == 0) break;
+
             memset(buffer, 0, sizeof(buffer));
         }
         //close(connected_clients[i].client_sock);
@@ -136,11 +146,26 @@ void server::send_file(char *filepath){
         //}
 
     }
-    for (int i=0; i<1000; i++)
+
+    for (int i=0; i<1000; i++) //DEBUGGING PURPOSES
     cout<<"Send finished"<<endl;
 
 }
 
+int server::check_correctsend(int num_bytes_sent, int buffer_len, int index){
+    
+    if (num_bytes_sent<0){
+        perror("send error");
+        connected_clients.erase(connected_clients.begin() + index);
+        return 0;
+    }
+    else if (num_bytes_sent != buffer_len){
+        cerr<<"send() sent incorrect number of bytes"<<endl;
+        exit(1);
+    }
+
+    return 1;
+}
 //int main(){
 
     //server s1 (12345);
