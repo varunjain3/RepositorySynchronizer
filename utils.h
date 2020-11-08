@@ -1,3 +1,6 @@
+#ifndef utils
+#define utils
+
 #include <iostream>
 #include <fstream>
 
@@ -9,3 +12,5 @@ int get_filesize(char * filename){
     input.seekg(0, ios::end);
     return (int)input.tellg();
 }
+
+#endif

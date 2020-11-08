@@ -1,3 +1,6 @@
+#ifndef p2p_client 
+#define p2p_client
+
 #include <fstream>
 #include <string>
 #include <string.h>
@@ -118,3 +121,5 @@ void client::receive_data(char * save_folder){
 
     //return 0;
 //}
+
+#endif
