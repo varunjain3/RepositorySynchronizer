@@ -10,7 +10,7 @@ p2:
 	./file_transfer 10000 12345 10002 129.txt received2/
 
 p3: 
-	./file_transfer 10002 10000 12345 3523.txt received3/
+	./file_transfer 10002 10000 12345 3651.txt received3/
 
 clean:
 	rm file_transfer
