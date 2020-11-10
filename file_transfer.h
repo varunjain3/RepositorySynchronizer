@@ -20,6 +20,7 @@
     }
 
 int serv_port, client_port1, client_port2;
+
 class p2p
 {
 
@@ -74,6 +75,12 @@ public:
             cout << "Thread 2 finished" << endl;
     }
 };
+// t2[i].join();
+// for (int i = 0; i < 1000; i++)
+//     cout << "Thread 2 finished" << endl;
+// }
+// }
+// ;
 
 // int main(int argc, char * argv[]){
 
@@ -90,4 +97,4 @@ public:
 //     p1.start();
 
 //     return 0;
-// }/ }/ }
+// }

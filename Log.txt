@@ -1,0 +1,2 @@
+hello=1,NULL
+hello/stringtry.cpp=0,6b5a640c7639e5bca77c14d7942e413c
