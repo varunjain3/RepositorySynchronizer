@@ -152,19 +152,6 @@ public:
         cout << "\nParent - " << parent << "\tCommand - " << (char *)command.c_str();
         system((char *)command.c_str());
 
-        // size_t prev = 0,
-        //        pos = 0;
-        // do
-        // {
-        //     pos = filename.find(delim, prev);
-        //     if (pos == string::npos)
-        //         pos = str.length();
-        //     string token = str.substr(prev, pos - prev);
-        //     if (!token.empty())
-        //         tokens.push_back(token);
-        //     prev = pos + delim.length();
-        // }
-
         // Actuall Copying
         ifstream source(SRC, ios::binary);
         ofstream dest(DEST, ios::binary);
@@ -271,6 +258,27 @@ void checkchanges(WatchDog &src, WatchDog &dest)
     dest.updatelog(currlog);
 };
 
+// Write file
+int WriteFile(string fname, filemap *m)
+{
+    int count = 0;
+    if (m->empty())
+        return 0;
+
+    FILE *fp = fopen(fname.c_str(), "w");
+    if (!fp)
+        return -errno;
+
+    for (auto it = m->begin(); it != m->end(); it++)
+    {
+        fprintf(fp, "%s=%d,%s\n", it->first.c_str(), it->second.folder, it->second.hash.c_str());
+        count++;
+    }
+
+    fclose(fp);
+    return count;
+}
+/*
 int main(int argc, char *argv[])
 {
 
@@ -279,6 +287,12 @@ int main(int argc, char *argv[])
     string folder2 = "test2";
     WatchDog g(folder1, folder2);
     WatchDog k(folder2, folder1);
+
+    // ofstream file_obj("Log.txt", ios::app);
+    // file_obj.write((char *)&g.Log, sizeof(g.Log));
+    // file_obj.close();
+
+    WriteFile("Log.txt", &g.Log);
 
     while (true)
     {
@@ -289,3 +303,4 @@ int main(int argc, char *argv[])
         checkchanges(k, g);
     }
 }
+*/
