@@ -72,7 +72,7 @@ public:
 
     void accept_connection();
 
-    void send_file(char *);
+    void send_file(char *, char *);
 
     int check_correctsend(int, int, int);
 
@@ -87,7 +87,7 @@ public:
 void server::accept_connection()
 {
 
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 1; i++)
     {
         client_details t1;
         t1.client_addr_len = sizeof(t1.client_addr);
@@ -120,7 +120,7 @@ void server::accept_connection()
     }
 }
 
-void server::send_file(char *filepath)
+void server::send_file(char *rootfolder, char *filepath)
 {
     int BUFSIZE = 1024;
     char buffer[BUFSIZE + 1];
@@ -135,15 +135,22 @@ void server::send_file(char *filepath)
     {
 
         ssize_t num_bytes_sent = 0;
+        cout << "Hello... client you there?..." << endl;
         num_bytes_sent = send(connected_clients[i].client_sock, file_desc, 1024, 0);
         if (check_correctsend(num_bytes_sent, 1024, i) == 0)
             continue;
 
+        char filepath_temp[1024];
+        strcpy(filepath_temp, rootfolder);
+        strcat(filepath_temp, filepath);
+        filepath = filepath_temp;
+
+        cout << "SERVER- Trying to open file - " << filepath << endl;
         FILE *fp = fopen(filepath, "r");
         memset(buffer, 0, sizeof(buffer));
         while (fgets(buffer, BUFSIZE + 1, fp))
         {
-
+            cout << "SERVER- Starting file..." << endl;
             num_bytes_sent = send(connected_clients[i].client_sock, buffer, strlen(buffer), 0);
             cout << "Sending in progress..." << endl;
             if (check_correctsend(num_bytes_sent, strlen(buffer), i) == 0)
@@ -159,7 +166,7 @@ void server::send_file(char *filepath)
         //}
     }
 
-    for (int i = 0; i < 1000; i++) //DEBUGGING PURPOSES
+    for (int i = 0; i < 1; i++) //DEBUGGING PURPOSES
         cout << "Send finished" << endl;
 }
 

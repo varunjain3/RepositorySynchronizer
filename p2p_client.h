@@ -90,23 +90,31 @@ string client::receive_data(char *save_folder)
         perror("recv error");
         return "error";
     }
-    if (num_bytes == 0)
+    else if (num_bytes == 0)
     {
         cout << "Nothing Received from Server" << endl;
         return "empty";
+    }
+    else
+    {
+        cout << "Client Recieved bytes =" << num_bytes << endl;
     }
 
     //filepath | filesize
     cout << file_desc << endl;
     filepath = strtok(file_desc, "|");
     FileSize = atoi(strtok(NULL, "|"));
+    filepath++;
+    cout << "filepath - " << filepath << " " << FileSize << endl;
 
     char filepath_temp[1024];
     strcpy(filepath_temp, save_folder);
     strcat(filepath_temp, filepath);
     filepath = filepath_temp;
+    cout << "filepath2 - " << filepath << " " << FileSize << endl;
 
-    string DEST(filepath);
+    string DEST = filepath;
+    cout << "filepath3 - " << DEST << " " << FileSize << endl;
     string parent = DEST.substr(0, DEST.find_last_of("/"));
     string command = "mkdir -p " + parent;
     system((char *)command.c_str());

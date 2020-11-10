@@ -56,40 +56,21 @@ public:
         for (int i = 0; i < num_foreign_hosts; i++)
         {
             c1[i].connect2server();
+            cout << "client initialized...";
         }
         s1.accept_connection();
+        cout << "server accepted";
     }
 
-    void start()
+    void server_filelist(string rootdir, filelist addlist)
     {
-        //for (int i = 0; i < num_foreign_hosts; i++)
-        //{
-        //c1[i].connect2server();
-        //}
-        //s1.accept_connection();
-        thread t1 = thread(&server::send_file, s1, filepath1);
-        //s1.send_file(filepath1);
-        thread t2[num_foreign_hosts];
-        for (int i = 0; i < num_foreign_hosts; i++)
-        {
-            t2[i] = thread(&client::receive_data, c1[i], save_folder);
-            //c1[i].receive_data(filepath2);
-        }
-        t1.join();
-        for (int i = 0; i < 1000; i++)
-            cout << "Thread 1 finished" << endl;
-        for (int i = 0; i < num_foreign_hosts; i++)
-            t2[i].join();
-        for (int i = 0; i < 1000; i++)
-            cout << "Thread 2 finished" << endl;
-    }
-
-    void server_filelist(filelist addlist)
-    {
+        cout << "starting file transfer..." << endl;
         for (auto itr = addlist.begin(); itr != addlist.end(); itr++)
         {
-            s1.send_file((char *)(*itr).c_str());
+            s1.send_file((char *)rootdir.c_str(), (char *)(*itr).c_str());
+            cout << "server sent file" << endl;
         }
+        cout << "returning from server file list..." << endl;
     }
 
     ~p2p() { ; }

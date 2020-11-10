@@ -198,7 +198,7 @@ public:
     void addlogtolist(filepair &adds, filemap log)
     {
         filelist addfiles = adds.first;
-        string logfile = "Log.txt";
+        string logfile = this->rootdir + "Log.txt";
         WriteFile(logfile, &log);
         addfiles.push_back(logfile);
 

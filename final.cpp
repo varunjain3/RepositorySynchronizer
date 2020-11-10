@@ -18,12 +18,14 @@ void server_thread(string folder, vector<pair<char *, int>> foreign_hosts, int s
 
 start:
     // Initializing for initial files to send
+    cout << "intializing... watchdog" << endl;
     pair<filelist, filelist> adds = w1.initialize();
     filelist addfilelist = adds.first;
     filelist addfolderlist = adds.second;
+    cout << "intialized watchdog" << endl;
 
     // |||||Call server add list here ||||||||
-    p1.server_filelist(addfilelist);
+    p1.server_filelist(w1.rootdir, addfilelist);
 
     // Update loop
     while (true)
@@ -42,8 +44,8 @@ start:
             goto start;
         }
 
-        p1.server_filelist(addfilelist);
-
+        p1.server_filelist(w1.rootdir, addfilelist);
+        cout << "back to watchdog after sleep" << endl;
         sleep(2);
     }
 }
@@ -53,10 +55,12 @@ void client_thread(string destdir)
 
     while (true)
     {
-
+        cout << "getting lock" << endl;
         while (m_lock.try_lock())
-            cout << "Locked in client thread";
+            cout
+                << "Locked in client thread" << endl;
 
+        cout << "client Lock acquired..." << endl;
         string file = p1.c1[0].receive_data((char *)destdir.c_str());
 
         if (file == "Log.txt")
@@ -107,6 +111,7 @@ int main(int argc, char *argv[])
 
     string root_folder = argv[3];
     w1 = WatchDog(root_folder);
+    cout << "Watchdog Ready" << endl;
 
     // |||||||||Call server add here|||||||||||||
     thread t1 = thread(server_thread, root_folder, foreign_hosts, serv_port);
