@@ -1,3 +1,6 @@
+#ifndef p2p_server
+#define p2p_server
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -12,6 +15,7 @@
 #include <unistd.h>
 #include "p2p_client.h"
 #include "p2p_server.h"
+#include "hell.h"
 #include <thread>
 #define PR(s)               \
     {                       \
@@ -25,13 +29,14 @@ class p2p
 {
 
 private:
-    server s1;
     int num_foreign_hosts;
-    client c1[5];
     char filepath1[1024];
     char save_folder[1024];
 
 public:
+    server s1;
+    client c1[5];
+
     p2p() { ; }
 
     p2p(int serv_port, vector<pair<char *, int>> foreign_hosts)
@@ -51,13 +56,22 @@ public:
         strcpy(save_folder, file2);
     }
 
-    void start()
+    void initialise()
     {
         for (int i = 0; i < num_foreign_hosts; i++)
         {
             c1[i].connect2server();
         }
         s1.accept_connection();
+    }
+
+    void start()
+    {
+        //for (int i = 0; i < num_foreign_hosts; i++)
+        //{
+        //c1[i].connect2server();
+        //}
+        //s1.accept_connection();
         thread t1 = thread(&server::send_file, s1, filepath1);
         //s1.send_file(filepath1);
         thread t2[num_foreign_hosts];
@@ -74,10 +88,17 @@ public:
         for (int i = 0; i < 1000; i++)
             cout << "Thread 2 finished" << endl;
     }
+
+    void server_filelist(filelist addlist)
+    {
+        for (auto itr = addlist.begin(); itr != addlist.end(); itr++)
+        {
+            s1.send_file(*itr.filepath);
+        }
+    }
+
+    ~p2p() { ; }
 };
-// t2[i].join();
-// for (int i = 0; i < 1000; i++)
-//     cout << "Thread 2 finished" << endl;
 // }
 // }
 // ;
@@ -98,3 +119,5 @@ public:
 
 //     return 0;
 // }
+
+#endif
