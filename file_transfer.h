@@ -1,6 +1,3 @@
-#ifndef p2p_server
-#define p2p_server
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -15,8 +12,6 @@
 #include <unistd.h>
 #include "p2p_client.h"
 #include "p2p_server.h"
-#include "hell.h"
-#include <thread>
 #define PR(s)               \
     {                       \
         perror((s));        \
@@ -93,7 +88,7 @@ public:
     {
         for (auto itr = addlist.begin(); itr != addlist.end(); itr++)
         {
-            s1.send_file(*itr.filepath);
+            s1.send_file((char *)(*itr).c_str());
         }
     }
 
@@ -119,5 +114,3 @@ public:
 
 //     return 0;
 // }
-
-#endif

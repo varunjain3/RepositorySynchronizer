@@ -1,6 +1,3 @@
-#ifndef p2p_server
-#define p2p_server
-
 #include <vector>
 #include <string>
 #include <string.h>
@@ -14,7 +11,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "utils.h"
-#include "hell.h"
 #define PR(s)               \
     {                       \
         perror((s));        \
@@ -185,7 +181,6 @@ int server::check_correctsend(int num_bytes_sent, int buffer_len, int index)
     return 1;
 }
 
-#endif
 //int main(){
 
 //server s1 (12345);

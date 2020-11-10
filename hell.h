@@ -9,42 +9,17 @@
 #include <sys/stat.h>
 #include "toolkit.h"
 #include "md5.h"
+#include "dfh.h"
 
 using namespace std;
 
-struct filestat
-{
-    string hash;
-    bool folder;
-};
-
 // Filemap function
+typedef list<string> filelist;
 typedef map<string, filestat> filemap;
 typedef pair<string, filestat> fileobject;
 typedef pair<filelist, filelist> filepair;
-typedef list<string> filelist;
+
 // Watchdog file watcher
-
-// Write file
-int WriteFile(string fname, filemap *m)
-{
-    int count = 0;
-    if (m->empty())
-        return 0;
-
-    FILE *fp = fopen(fname.c_str(), "w");
-    if (!fp)
-        return -errno;
-
-    for (auto it = m->begin(); it != m->end(); it++)
-    {
-        fprintf(fp, "%s=%d,%s\n", it->first.c_str(), it->second.folder, it->second.hash.c_str());
-        count++;
-    }
-
-    fclose(fp);
-    return count;
-}
 
 class WatchDog
 {
@@ -54,6 +29,7 @@ public:
     string rootdir;
     // Constructor, will initialize the Watchdog
 
+    WatchDog() { ; }
     WatchDog(string path)
     {
         this->Log = getLog(path);

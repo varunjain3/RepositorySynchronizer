@@ -3,9 +3,10 @@
 #include <string.h>
 #include <map>
 #include <mutex>
+#include <thread>
+
 #include "hell.h"
 #include "file_transfer.h"
-#include "dfh.h"
 
 mutex m_lock;
 
@@ -108,8 +109,11 @@ int main(int argc, char *argv[])
     w1 = WatchDog(root_folder);
 
     // |||||||||Call server add here|||||||||||||
-    thread(server_thread, (root_folder, foreign_hosts, serv_port));
-    thread(client_thread, (root_folder));
+    thread t1 = thread(server_thread, root_folder, foreign_hosts, serv_port);
+    thread t2 = thread(client_thread, root_folder);
+
+    t1.join();
+    t2.join();
 
     return 0;
 };

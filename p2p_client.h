@@ -88,7 +88,7 @@ string client::receive_data(char *save_folder)
     if (num_bytes < 0)
     {
         perror("recv error");
-        return;
+        return "error";
     }
     if (num_bytes == 0)
     {
@@ -122,7 +122,7 @@ string client::receive_data(char *save_folder)
         if (num_bytes < 0)
         {
             perror("recv error");
-            return;
+            return "error";
         }
 
         buffer[num_bytes] = '\0';
