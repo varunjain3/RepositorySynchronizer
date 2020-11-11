@@ -1,0 +1,4 @@
+file1.txt=0,052379702d4728bf5b1a8df40473236e
+file2 (copy).txt=0,cd2bb6e5c8d89eeebbab3324c1bcff21
+file2.txt=0,cd2bb6e5c8d89eeebbab3324c1bcff21
+file3.txt=0,cd2bb6e5c8d89eeebbab3324c1bcff21
