@@ -199,6 +199,7 @@ public:
     {
         filelist addfiles = adds.first;
         string logfile = this->rootdir + "Log.txt";
+        cout << "Saving Logs..." << endl;
         WriteFile(logfile, &log);
         addfiles.push_back("Log.txt");
 
@@ -211,9 +212,10 @@ public:
         cout << "Root Dir - " << this->rootdir << endl;
         currlog = this->getLog(this->rootdir);
         filepair adds = this->comparelog(currlog, this->Log);
+        filepair dells = this->comparelog(this->Log, currlog);
 
-        if (adds.first.size() != 0 || adds.second.size() != 0)
-            addlogtolist(adds, this->Log);
+        if (adds.first.size() != 0 || adds.second.size() != 0 || dells.first.size() != 0)
+            addlogtolist(adds, currlog);
         this->updatelog(currlog);
         return adds;
     }

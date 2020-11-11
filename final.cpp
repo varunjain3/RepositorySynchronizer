@@ -67,9 +67,9 @@ void client_thread(string destdir)
         cout << "client Lock acquired..." << endl;
         string file = p1.c1[0].receive_data((char *)destdir.c_str());
 
-        if (file == "Log.txt")
+        if (file == w1.rootdir + "Log.txt")
         {
-            filemap currLog = ReadFile("Log.txt");
+            filemap currLog = ReadFile(w1.rootdir + "Log.txt");
             filepair dels = w1.comparelog(w1.Log, currLog);
             filelist del_list = dels.first;
             filelist del_folder = dels.second;
