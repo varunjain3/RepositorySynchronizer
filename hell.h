@@ -87,7 +87,7 @@ public:
         folder = opendir(path.c_str());
         while ((entity = readdir(folder)) != NULL)
         {
-            if ((strcmp(entity->d_name, ".") != 0) && (strcmp(entity->d_name, "..") != 0))
+            if ((strcmp(entity->d_name, ".") != 0) && (strcmp(entity->d_name, "..") && strcmp(entity->d_name, "Log.txt")) != 0)
             {
                 char *fname = entity->d_name;
                 temp_path = path + "/" + fname;
@@ -105,7 +105,7 @@ public:
                     tempstat.hash = md5_from_file(temp_path);
                 }
 
-                string new_path = temp_path.substr(temp_path.find("/", 0) + 1, temp_path.length());
+                string new_path = temp_path.substr(temp_path.find("/", 0) + 2, temp_path.length());
                 cout << new_path << " " << tempstat.folder << "\t Hash- " << tempstat.hash << endl;
 
                 addkeyvalue(log, new_path, tempstat);
@@ -200,7 +200,7 @@ public:
         filelist addfiles = adds.first;
         string logfile = this->rootdir + "Log.txt";
         WriteFile(logfile, &log);
-        addfiles.push_back(logfile);
+        addfiles.push_back("Log.txt");
 
         adds = make_pair(addfiles, adds.second);
     }
@@ -210,9 +210,11 @@ public:
         filemap currlog;
         cout << "Root Dir - " << this->rootdir << endl;
         currlog = this->getLog(this->rootdir);
-
         filepair adds = this->comparelog(currlog, this->Log);
-        addlogtolist(adds, this->Log);
+
+        if (adds.first.size() != 0 || adds.second.size() != 0)
+            addlogtolist(adds, this->Log);
+        this->updatelog(currlog);
         return adds;
     }
 };

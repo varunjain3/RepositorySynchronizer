@@ -88,7 +88,7 @@ string client::receive_data(char *save_folder)
     if (num_bytes < 0)
     {
         perror("recv error");
-        return "error";
+        return "empty";
     }
     else if (num_bytes == 0)
     {
@@ -104,7 +104,6 @@ string client::receive_data(char *save_folder)
     cout << file_desc << endl;
     filepath = strtok(file_desc, "|");
     FileSize = atoi(strtok(NULL, "|"));
-    filepath++;
     cout << "filepath - " << filepath << " " << FileSize << endl;
 
     char filepath_temp[1024];
@@ -122,27 +121,27 @@ string client::receive_data(char *save_folder)
     unsigned int rec_len = 0;
     FILE *fp = fopen(filepath, "w");
     int ct = 0;
-    do
+    while (rec_len < FileSize)
     {
-        cout << rec_len << endl;
         char buffer[BUFSIZE + 1];
-        num_bytes = recv(sock, buffer, BUFSIZE, 0); //receives data from the transport layer
+        num_bytes = recv(sock, buffer, min(BUFSIZE, (int)(FileSize - rec_len)), 0); //receives data from the transport layer
         if (num_bytes < 0)
         {
             perror("recv error");
-            return "error";
+            return "empty";
         }
 
         buffer[num_bytes] = '\0';
 
         rec_len += num_bytes;
+        cout << "client recieved " << rec_len << " of file..." << endl;
         fputs(buffer, fp);
         ct++;
         //if (ct>100) break;
+    }
+    fclose(fp);
 
-    } while (rec_len < FileSize);
-
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < 10; i++)
         cout << "received_finished" << endl;
 
     return filepath;

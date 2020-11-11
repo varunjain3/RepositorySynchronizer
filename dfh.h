@@ -28,7 +28,7 @@ int WriteFile(string fname, filemap *m)
 
     for (auto it = m->begin(); it != m->end(); it++)
     {
-        fprintf(fp, "%s=%s,%s\n", it->first.c_str(), it->second.folder, it->second.hash);
+        fprintf(fp, "%s=%d,%s\n", it->first.c_str(), it->second.folder, (char *)(it->second.hash.c_str()));
         count++;
     }
 

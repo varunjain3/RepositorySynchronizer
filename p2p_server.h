@@ -122,9 +122,14 @@ void server::accept_connection()
 
 void server::send_file(char *rootfolder, char *filepath)
 {
+
     int BUFSIZE = 1024;
     char buffer[BUFSIZE + 1];
-    int file_size = get_filesize(filepath);
+
+    char filepath_root[1024];
+    strcpy(filepath_root, rootfolder);
+    strcat(filepath_root, filepath);
+    int file_size = get_filesize(filepath_root);
 
     char file_desc[1024] = "";
     strcpy(file_desc, filepath);
@@ -135,18 +140,13 @@ void server::send_file(char *rootfolder, char *filepath)
     {
 
         ssize_t num_bytes_sent = 0;
-        cout << "Hello... client you there?..." << endl;
+        cout << "Hello... client you there?..." << file_desc << endl;
         num_bytes_sent = send(connected_clients[i].client_sock, file_desc, 1024, 0);
         if (check_correctsend(num_bytes_sent, 1024, i) == 0)
             continue;
 
-        char filepath_temp[1024];
-        strcpy(filepath_temp, rootfolder);
-        strcat(filepath_temp, filepath);
-        filepath = filepath_temp;
-
-        cout << "SERVER- Trying to open file - " << filepath << endl;
-        FILE *fp = fopen(filepath, "r");
+        cout << "SERVER- Trying to open file - " << filepath_root << endl;
+        FILE *fp = fopen(filepath_root, "r");
         memset(buffer, 0, sizeof(buffer));
         while (fgets(buffer, BUFSIZE + 1, fp))
         {

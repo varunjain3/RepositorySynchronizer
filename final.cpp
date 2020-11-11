@@ -19,9 +19,11 @@ void server_thread(string folder, vector<pair<char *, int>> foreign_hosts, int s
 start:
     // Initializing for initial files to send
     cout << "intializing... watchdog" << endl;
+    m_lock.lock();
     pair<filelist, filelist> adds = w1.initialize();
     filelist addfilelist = adds.first;
     filelist addfolderlist = adds.second;
+    m_lock.unlock();
     cout << "intialized watchdog" << endl;
 
     // |||||Call server add list here ||||||||
@@ -30,11 +32,13 @@ start:
     // Update loop
     while (true)
     {
-        m_lock.lock();
-
+        while (m_lock.try_lock())
+            ;
+        cout << "watchdog calculating changed..." << endl;
         filepair adds = w1.checkchanges();
         filelist addfilelist = adds.first;
         filelist addfolderlist = adds.second;
+        cout << "Watchdog Changes calculated..." << endl;
         m_lock.unlock();
 
         // If connection broken
@@ -83,11 +87,22 @@ void client_thread(string destdir)
                 cout << "\nDeleting folder... " << command;
                 system((char *)command.c_str());
             }
+            w1.updatelog(currLog);
+            WriteFile(w1.rootdir + "Log.txt", &currLog);
+            m_lock.unlock();
+            cout << "client lock unlocked" << endl;
         }
         else if (file == "empty")
         {
             m_lock.unlock();
+            cout << "client lock unlocked" << endl;
             sleep(1);
+        }
+        else
+        {
+            // cout << "client lock unlocked" << endl;
+            sleep(5);
+            // m_lock.unlock();
         }
     }
 };
