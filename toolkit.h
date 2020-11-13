@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <string.h> //for std::string
 #include <fstream>
 #include <map>
