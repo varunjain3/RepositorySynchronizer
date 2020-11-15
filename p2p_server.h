@@ -169,16 +169,6 @@ int server::check_correctsend(int num_bytes_sent, int bytes_to_send, int index){
 
     return 1;
 }
-//int main(){
 
-    //server s1 (12345);
-
-    //while (1) {
-        //s1.accept_connection();
-        //char filepath [] = "books/50.txt";
-        //s1.send_file(filepath);
-    //} 
-    //return 0;
-//}
 
 #endif

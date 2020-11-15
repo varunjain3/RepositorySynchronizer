@@ -121,14 +121,5 @@ void client::receive_data(char * save_folder){
 }
 
 
-//int main(){
-
-    //client c1("127.0.0.1", 12345);
-    //c1.connect2server();
-    //char filepath[] = "received/50.txt";
-    //c1.receive_data(filepath);
-
-    //return 0;
-//}
 
 #endif
