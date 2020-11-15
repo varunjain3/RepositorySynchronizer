@@ -131,13 +131,13 @@ void server::send_file(char *filepath){
         num_bytes_sent = send(connected_clients[i].client_sock, file_desc, 1024, 0); 
         if (check_correctsend(num_bytes_sent, 1024, i) == 0) continue;
 
-        FILE *fp = fopen(filepath, "r");
+        FILE *fp = fopen(filepath, "rb");
         memset(buffer, 0, sizeof(buffer));
-        while (fgets(buffer, BUFSIZE+1, fp)){
-
-            num_bytes_sent = send(connected_clients[i].client_sock, buffer, strlen(buffer), 0);
+        while (!feof(fp)){
+            int read_bytes = fread(buffer, 1, BUFSIZE, fp); //fgets didn't work for images, idky
+            num_bytes_sent = send(connected_clients[i].client_sock, buffer, read_bytes, 0);
             cout<<"Sending in progress..."<<endl;
-            if (check_correctsend(num_bytes_sent, strlen(buffer), i) == 0) break;
+            if (check_correctsend(num_bytes_sent, read_bytes, i) == 0) break;
 
             memset(buffer, 0, sizeof(buffer));
         }
@@ -150,19 +150,19 @@ void server::send_file(char *filepath){
 
     }
 
-    for (int i=0; i<1000; i++) //DEBUGGING PURPOSES
+    for (int i=0; i<10; i++) //DEBUGGING PURPOSES
     cout<<"Send finished"<<endl;
 
 }
 
-int server::check_correctsend(int num_bytes_sent, int buffer_len, int index){
+int server::check_correctsend(int num_bytes_sent, int bytes_to_send, int index){
     
     if (num_bytes_sent<0){
         perror("send error");
         connected_clients.erase(connected_clients.begin() + index);
         return 0;
     }
-    else if (num_bytes_sent != buffer_len){
+    else if (num_bytes_sent != bytes_to_send){
         cerr<<"send() sent incorrect number of bytes"<<endl;
         exit(1);
     }

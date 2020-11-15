@@ -76,6 +76,7 @@ void client::receive_data(char * save_folder){
 
     int BUFSIZE = 1024, num_bytes = 0, FileSize = 0;
     char *filepath, file_desc[1024]; 
+    char buffer[BUFSIZE+1];
 
     num_bytes = recv(sock, file_desc, 1024, 0); 
     if (num_bytes<0){   perror ("recv error");  return; }
@@ -89,25 +90,33 @@ void client::receive_data(char * save_folder){
     strcat(filepath_temp, filepath);
     filepath = filepath_temp;
 
+    cout<<"FILEPATH "<<filepath<<endl;
+    cout<<"FILESIZE "<<FileSize<<endl;
     unsigned int rec_len = 0; 
-    FILE *fp = fopen(filepath, "w");
-    int ct = 0; 
-    do{
-        cout<<rec_len<<endl;
-        char buffer[BUFSIZE+1];
-        num_bytes = recv(sock, buffer, BUFSIZE, 0); //receives data from the transport layer
+    FILE *fp = fopen(filepath, "wb");
+    while (rec_len<FileSize)
+    {
+        memset(buffer, '\0', sizeof(buffer));
+        num_bytes = recv(sock, buffer, min(BUFSIZE, (int)FileSize - (int)rec_len), 0); //receives data from the transport layer
+
         if (num_bytes<0){   perror ("recv error");  return; }
+        //if (num_bytes==0){  break; }
 
         buffer[num_bytes] = '\0';
-
         rec_len += num_bytes;
-        fputs (buffer, fp);
-        ct++;
-        //if (ct>100) break;
 
-    }   while (rec_len<FileSize);
+        int rec_bytes = fwrite (buffer, 1, num_bytes, fp); //fputs didn't work for images idky
 
-    for (int i=0; i<1000; i++)
+        //if (strcmp(filepath, "received1/books/mario.jpg")==0){
+            //cout<<"Received Bytes "<<rec_bytes<<endl;
+            //fputs (buffer, fp);
+            //cout<<rec_len<<" "<<FileSize<<endl;
+        //}
+
+        cout<<rec_len<<endl;
+    }   
+
+    for (int i=0; i<10; i++)
     cout<<"received_finished"<<endl;
 }
 

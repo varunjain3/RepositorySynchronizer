@@ -59,11 +59,11 @@ public:
             //c1[i].receive_data(filepath2);
         }
         t1.join();
-        for (int i=0; i<1000; i++)
+        for (int i=0; i<10; i++)
         cout<<"Thread 1 finished"<<endl;
         for (int i=0; i<num_foreign_hosts; i++)
             t2[i].join();
-        for (int i=0; i<1000; i++)
+        for (int i=0; i<10; i++)
         cout<<"Thread 2 finished"<<endl;
     } 
 

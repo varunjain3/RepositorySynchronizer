@@ -13,4 +13,5 @@ int get_filesize(char * filename){
     return (int)input.tellg();
 }
 
+
 #endif
