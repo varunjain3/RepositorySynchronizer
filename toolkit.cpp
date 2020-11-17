@@ -3,25 +3,15 @@
 
 string md5_from_file(const string path)
 {
-
-    //Start opening your file
-    ifstream inBigArrayfile;
-    inBigArrayfile.open(path, ios::binary | ios::in);
-
-    //Find length of file
-    inBigArrayfile.seekg(0, ios::end);
-    long Length = inBigArrayfile.tellg();
-    inBigArrayfile.seekg(0, ios::beg);
-
-    //read in the data from your file
-    char *InFileData = new char[Length];
-    inBigArrayfile.read(InFileData, Length);
+    ifstream t(path);
+    stringstream buffer;
+    buffer << t.rdbuf();
 
     //Calculate MD5 hash
-    string Temp = md5(InFileData);
+    string Temp = md5(buffer.str());
 
     //Clean up
-    delete[] InFileData;
+    buffer.str("");
 
     return Temp;
 }

@@ -87,7 +87,7 @@ string client::receive_data(char *save_folder)
     num_bytes = recv(sock, file_desc, 1024, MSG_DONTWAIT);
     if (num_bytes < 0)
     {
-        perror("recv error");
+        // perror("recv error");
         return "empty";
     }
     else if (num_bytes == 0)

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string.h>
 #include <fstream>
+#include <sstream>
 #include "md5.h"
 
 using namespace std;

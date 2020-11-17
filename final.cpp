@@ -32,8 +32,7 @@ start:
     // Update loop
     while (true)
     {
-        while (m_lock.try_lock())
-            ;
+        m_lock.lock();
         cout << "watchdog calculating changed..." << endl;
         filepair adds = w1.checkchanges();
         filelist addfilelist = adds.first;
@@ -54,18 +53,18 @@ start:
     }
 }
 
-void client_thread(string destdir)
+void client_thread(string destdir, int clientno)
 {
 
     while (true)
     {
         cout << "getting lock" << endl;
         while (m_lock.try_lock())
-            cout
-                << "Locked in client thread" << endl;
+            ;
+        // cout << "Locked in client thread" << endl;
 
-        cout << "client Lock acquired..." << endl;
-        string file = p1.c1[0].receive_data((char *)destdir.c_str());
+        // cout << "client Lock acquired..." << endl;
+        string file = p1.c1[clientno].receive_data((char *)destdir.c_str());
 
         if (file == w1.rootdir + "Log.txt")
         {
@@ -101,7 +100,7 @@ void client_thread(string destdir)
         else
         {
             // cout << "client lock unlocked" << endl;
-            sleep(5);
+            // sleep(5);
             // m_lock.unlock();
         }
     }
@@ -110,30 +109,32 @@ void client_thread(string destdir)
 int main(int argc, char *argv[])
 {
 
-    serv_port = atoi(argv[1]);
+    serv_port = atoi(argv[2]);
 
-    client_port1 = atoi(argv[2]);
+    client_port1 = atoi(argv[3]);
+    client_port2 = atoi(argv[4]);
 
-    // client_port2 = atoi(argv[3]);
     vector<pair<char *, int>> foreign_hosts;
 
     foreign_hosts.push_back({(char *)"127.0.0.1", client_port1});
-    // foreign_hosts.push_back({(char *)"127.0.0.1", client_port2});
+    foreign_hosts.push_back({(char *)"127.0.0.1", client_port2});
 
     // Initialize Server & Client!!
     p1 = p2p(serv_port, foreign_hosts);
     p1.initialise();
 
-    string root_folder = argv[3];
+    string root_folder = argv[1];
     w1 = WatchDog(root_folder);
     cout << "Watchdog Ready" << endl;
 
     // |||||||||Call server add here|||||||||||||
     thread t1 = thread(server_thread, root_folder, foreign_hosts, serv_port);
-    thread t2 = thread(client_thread, root_folder);
+    thread t2 = thread(client_thread, root_folder, 0);
+    thread t3 = thread(client_thread, root_folder, 1);
 
     t1.join();
     t2.join();
+    t3.join();
 
     return 0;
 };
