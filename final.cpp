@@ -12,8 +12,9 @@ mutex m_lock;
 
 p2p p1;
 WatchDog w1;
+int ticket = 0;
 
-void server_thread(string folder, vector<pair<char *, int>> foreign_hosts, int serv_port)
+void server_thread(string folder, vector<pair<char *, int>> foreign_hosts, int serv_port, int turn)
 {
 
 start:
@@ -32,6 +33,8 @@ start:
     // Update loop
     while (true)
     {
+        while (ticket != turn)
+            ;
         m_lock.lock();
         cout << "watchdog calculating changed..." << endl;
         filepair adds = w1.checkchanges();
@@ -61,6 +64,7 @@ void client_thread(string destdir, int clientno)
         cout << "getting lock" << endl;
         while (m_lock.try_lock())
             ;
+
         // cout << "Locked in client thread" << endl;
 
         // cout << "client Lock acquired..." << endl;
@@ -88,6 +92,7 @@ void client_thread(string destdir, int clientno)
             }
             w1.updatelog(currLog);
             WriteFile(w1.rootdir + "Log.txt", &currLog);
+            ticket = (ticket + 1) % 3;
             m_lock.unlock();
             cout << "client lock unlocked" << endl;
         }
@@ -96,12 +101,6 @@ void client_thread(string destdir, int clientno)
             m_lock.unlock();
             cout << "client lock unlocked" << endl;
             sleep(1);
-        }
-        else
-        {
-            // cout << "client lock unlocked" << endl;
-            // sleep(5);
-            // m_lock.unlock();
         }
     }
 };
@@ -113,6 +112,7 @@ int main(int argc, char *argv[])
 
     client_port1 = atoi(argv[3]);
     client_port2 = atoi(argv[4]);
+    int turn = atoi(argv[5]);
 
     vector<pair<char *, int>> foreign_hosts;
 
@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     cout << "Watchdog Ready" << endl;
 
     // |||||||||Call server add here|||||||||||||
-    thread t1 = thread(server_thread, root_folder, foreign_hosts, serv_port);
+    thread t1 = thread(server_thread, root_folder, foreign_hosts, serv_port, turn);
     thread t2 = thread(client_thread, root_folder, 0);
     thread t3 = thread(client_thread, root_folder, 1);
 

@@ -214,8 +214,8 @@ public:
         filepair adds = this->comparelog(currlog, this->Log);
         filepair dells = this->comparelog(this->Log, currlog);
 
-        if (adds.first.size() != 0 || adds.second.size() != 0 || dells.first.size() != 0)
-            addlogtolist(adds, currlog);
+        // if (adds.first.size() != 0 || adds.second.size() != 0 || dells.first.size() != 0)
+        addlogtolist(adds, currlog);
         this->updatelog(currlog);
         return adds;
     }
