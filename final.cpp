@@ -13,6 +13,7 @@ mutex m_lock;
 p2p p1;
 WatchDog w1;
 int ticket = 0;
+int turn_global = 0;
 
 void server_thread(string folder, vector<pair<char *, int>> foreign_hosts, int serv_port, int turn)
 {
@@ -33,6 +34,7 @@ start:
     // Update loop
     while (true)
     {
+        cout<<ticket<<" "<<turn<<endl;
         while (ticket != turn)
             ;
         m_lock.lock();
@@ -41,7 +43,6 @@ start:
         filelist addfilelist = adds.first;
         filelist addfolderlist = adds.second;
         cout << "Watchdog Changes calculated..." << endl;
-        m_lock.unlock();
 
         // If connection broken
         if (p1.s1.get_connectedclients() == 0)
@@ -52,6 +53,8 @@ start:
 
         p1.server_filelist(w1.rootdir, addfilelist);
         cout << "back to watchdog after sleep" << endl;
+        ticket = (ticket + 1) % 3;
+        m_lock.unlock();
         sleep(2);
     }
 }
@@ -77,11 +80,23 @@ void client_thread(string destdir, int clientno)
             filelist del_list = dels.first;
             filelist del_folder = dels.second;
 
+            pair<filelist, filelist> adds = w1.comparelog(currLog, w1.Log);
+            filelist add_list = adds.first;
+            filelist add_folder = adds.second;
+
             for (auto itr = del_list.begin(); itr != del_list.end(); itr++)
             {
-                cout << endl
-                     << "remove file- \t" << *itr;
-                w1.delFile(destdir, *itr);
+                bool to_delete = true;
+                for (auto itr1 = add_list.begin(); itr1 != add_list.end(); itr1++){
+                    if (*itr == *itr1){
+                        to_delete = false;
+                    }
+                }
+                if (to_delete){
+                    cout << endl
+                        << "remove file- \t" << *itr;
+                    w1.delFile(destdir, *itr);
+                }
             }
 
             for (auto itr = del_folder.begin(); itr != del_folder.end(); itr++)
@@ -90,9 +105,18 @@ void client_thread(string destdir, int clientno)
                 cout << "\nDeleting folder... " << command;
                 system((char *)command.c_str());
             }
+
+            for (auto itr = add_folder.begin(); itr != add_folder.end(); itr++)
+            {
+                    string command = "mkdir -p " + destdir + "/" + *itr;
+                    cout << "Adding folder- " << *itr << endl;
+                    system((char *)command.c_str());
+            }
+
             w1.updatelog(currLog);
             WriteFile(w1.rootdir + "Log.txt", &currLog);
             ticket = (ticket + 1) % 3;
+            cout<<ticket<<" "<<turn_global<<endl;
             m_lock.unlock();
             cout << "client lock unlocked" << endl;
         }
@@ -100,7 +124,7 @@ void client_thread(string destdir, int clientno)
         {
             m_lock.unlock();
             cout << "client lock unlocked" << endl;
-            sleep(1);
+            sleep(2);
         }
     }
 };
@@ -112,7 +136,7 @@ int main(int argc, char *argv[])
 
     client_port1 = atoi(argv[3]);
     client_port2 = atoi(argv[4]);
-    int turn = atoi(argv[5]);
+    int turn = atoi(argv[5]); turn_global = turn;
 
     vector<pair<char *, int>> foreign_hosts;
 

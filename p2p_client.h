@@ -120,7 +120,7 @@ string client::receive_data(char *save_folder)
 
     unsigned int rec_len = 0;
     FILE *fp = fopen(filepath, "w");
-    int ct = 0;
+
     while (rec_len < FileSize)
     {
         char buffer[BUFSIZE + 1];
@@ -135,10 +135,9 @@ string client::receive_data(char *save_folder)
 
         rec_len += num_bytes;
         cout << "client recieved " << rec_len << " of file..." << endl;
-        fputs(buffer, fp);
-        ct++;
-        //if (ct>100) break;
+        int rec_bytes = fwrite (buffer, 1, num_bytes, fp);
     }
+
     fclose(fp);
 
     for (int i = 0; i < 10; i++)

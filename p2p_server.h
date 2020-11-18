@@ -148,16 +148,26 @@ void server::send_file(char *rootfolder, char *filepath)
         cout << "SERVER- Trying to open file - " << filepath_root << endl;
         FILE *fp = fopen(filepath_root, "r");
         memset(buffer, 0, sizeof(buffer));
-        while (fgets(buffer, BUFSIZE + 1, fp))
-        {
-            cout << "SERVER- Starting file..." << endl;
-            num_bytes_sent = send(connected_clients[i].client_sock, buffer, strlen(buffer), 0);
-            cout << "Sending in progress..." << endl;
-            if (check_correctsend(num_bytes_sent, strlen(buffer), i) == 0)
-                break;
+
+        while (!feof(fp)){
+            int read_bytes = fread(buffer, 1, BUFSIZE, fp); //fgets didn't work for images, idky
+            num_bytes_sent = send(connected_clients[i].client_sock, buffer, read_bytes, 0);
+            cout<<"Sending in progress..."<<endl;
+            if (check_correctsend(num_bytes_sent, read_bytes, i) == 0) break;
 
             memset(buffer, 0, sizeof(buffer));
         }
+        //while (fgets(buffer, BUFSIZE + 1, fp))
+        //{
+            //cout << "SERVER- Starting file..." << endl;
+            //num_bytes_sent = send(connected_clients[i].client_sock, buffer, strlen(buffer), 0);
+            //cout << "Sending in progress..." << endl;
+            //if (check_correctsend(num_bytes_sent, strlen(buffer), i) == 0)
+                //break;
+
+            //memset(buffer, 0, sizeof(buffer));
+        //}
+
         //close(connected_clients[i].client_sock);
         //for (int j=0; j<1000; j++){
         //memset(buffer, 0, sizeof(buffer));
