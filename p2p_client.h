@@ -55,26 +55,28 @@ public:
             PR("pton failed");
     }
 
-    void connect2server();
+    int connect2server();
 
     string receive_data(char *);
 
     ~client() { ; }
 };
 
-void client::connect2server()
+int client::connect2server()
 {
-    while (1)
-    {
+    //while (1)
+    //{
         int t1 = connect(sock, (sockaddr *)&serv_addr, sizeof(serv_addr));
         if (t1 < 0)
         {
             perror("connect error");
-            sleep(1);
+            return 0;
+            //sleep(1);
         }
-        else
-            break;
-    }
+        //else
+            //break;
+    //}
+    return 1;
 }
 
 string client::receive_data(char *save_folder)
@@ -93,11 +95,11 @@ string client::receive_data(char *save_folder)
     else if (num_bytes == 0)
     {
         cout << "Nothing Received from Server" << endl;
-        return "empty";
+        return "broken";
     }
     else
     {
-        cout << "Client Recieved bytes =" << num_bytes << endl;
+        cout << "Client Recieved bytes = " << num_bytes << endl;
     }
 
     //filepath | filesize

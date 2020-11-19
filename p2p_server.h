@@ -87,8 +87,8 @@ public:
 void server::accept_connection()
 {
 
-    for (int i = 0; i < 2; i++)
-    {
+    //for (int i = 0; i < 2; i++)
+    //{
         client_details t1;
         t1.client_addr_len = sizeof(t1.client_addr);
 
@@ -117,7 +117,7 @@ void server::accept_connection()
         {
             cerr << "Unable to get client address" << endl;
         }
-    }
+    //}
 }
 
 void server::send_file(char *rootfolder, char *filepath)
@@ -141,9 +141,9 @@ void server::send_file(char *rootfolder, char *filepath)
 
         ssize_t num_bytes_sent = 0;
         cout << "Hello... client you there?..." << file_desc << endl;
-        num_bytes_sent = send(connected_clients[i].client_sock, file_desc, 1024, 0);
-        if (check_correctsend(num_bytes_sent, 1024, i) == 0)
-            continue;
+        num_bytes_sent = send(connected_clients[i].client_sock, file_desc, 1024, MSG_NOSIGNAL);
+        //if (check_correctsend(num_bytes_sent, 1024, i) == 0)
+            //continue;
 
         cout << "SERVER- Trying to open file - " << filepath_root << endl;
         FILE *fp = fopen(filepath_root, "r");
@@ -151,7 +151,8 @@ void server::send_file(char *rootfolder, char *filepath)
 
         while (!feof(fp)){
             int read_bytes = fread(buffer, 1, BUFSIZE, fp); //fgets didn't work for images, idky
-            num_bytes_sent = send(connected_clients[i].client_sock, buffer, read_bytes, 0);
+            cout<<"Debug 1"<<endl;
+            num_bytes_sent = send(connected_clients[i].client_sock, buffer, read_bytes, MSG_NOSIGNAL);
             cout<<"Sending in progress..."<<endl;
             if (check_correctsend(num_bytes_sent, read_bytes, i) == 0) break;
 

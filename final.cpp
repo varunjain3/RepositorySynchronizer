@@ -14,6 +14,9 @@ p2p p1;
 WatchDog w1;
 int ticket = 0;
 int turn_global = 0;
+vector<pair<char *, int>> foreign_hosts;
+string root_folder;
+bool send_to_all = false;
 
 void server_thread(string folder, vector<pair<char *, int>> foreign_hosts, int serv_port, int turn)
 {
@@ -21,23 +24,50 @@ void server_thread(string folder, vector<pair<char *, int>> foreign_hosts, int s
 start:
     // Initializing for initial files to send
     cout << "intializing... watchdog" << endl;
+
     m_lock.lock();
-    pair<filelist, filelist> adds = w1.initialize();
-    filelist addfilelist = adds.first;
-    filelist addfolderlist = adds.second;
-    m_lock.unlock();
-    cout << "intialized watchdog" << endl;
+    cout << "server lock acquired" << endl;
 
     // |||||Call server add list here ||||||||
-    p1.server_filelist(w1.rootdir, addfilelist);
-
+    if (p1.s1.get_connectedclients()!=0){
+        if (ticket == turn){
+            pair<filelist, filelist> adds = w1.checkchanges();
+            filelist addfilelist = adds.first;
+            filelist addfolderlist = adds.second;
+            cout << "intialized watchdog" << endl;
+            p1.server_filelist(w1.rootdir, addfilelist);
+            ticket = (ticket + 1) % (p1.s1.get_connectedclients() + 2);
+            send_to_all = false;
+            cout << "server lock released" << endl;
+            m_lock.unlock();
+        }
+        else{
+            cout << "server lock released" << endl;
+            m_lock.unlock();
+            sleep (1);
+            goto start;
+        }
+    }
+    else {
+        ticket = p1.s1.get_connectedclients() + 1;
+        cout << "server lock released" << endl;
+        m_lock.unlock(); 
+        sleep (2);
+        goto start;
+    }
     // Update loop
     while (true)
     {
-        cout<<ticket<<" "<<turn<<endl;
-        while (ticket != turn)
-            ;
+        //for (int i=0; i<1000; i++)
         m_lock.lock();
+        cout << "server lock acquired" << endl;
+        cout<<ticket<<" "<<turn<<endl;
+        if (ticket != turn){
+            m_lock.unlock();
+            sleep (1);
+            continue;
+        }
+
         cout << "watchdog calculating changed..." << endl;
         filepair adds = w1.checkchanges();
         filelist addfilelist = adds.first;
@@ -47,13 +77,33 @@ start:
         // If connection broken
         if (p1.s1.get_connectedclients() == 0)
         {
-            p1.initialise();
+            m_lock.unlock();
+            sleep(2);
+            //p1.initialise();
             goto start;
         }
-
-        p1.server_filelist(w1.rootdir, addfilelist);
+        if (send_to_all && turn == 0)
+        {
+            filelist addfilelist_temp;
+            for (auto itr = w1.Log.begin(); itr!=w1.Log.end(); itr++)
+            {
+                if (itr->second.folder == false)
+                {
+                    addfilelist_temp.push_back((*itr).first);
+                }
+            }
+            addfilelist_temp.push_back("Log.txt");
+            p1.server_filelist(w1.rootdir, addfilelist_temp);
+            send_to_all = false;
+        }
+        else
+        {
+            send_to_all = false;
+            p1.server_filelist(w1.rootdir, addfilelist);
+        }
         cout << "back to watchdog after sleep" << endl;
-        ticket = (ticket + 1) % 3;
+        ticket = (ticket + 1) % (p1.s1.get_connectedclients() + 2);
+        cout << "server lock released" << endl;
         m_lock.unlock();
         sleep(2);
     }
@@ -65,9 +115,15 @@ void client_thread(string destdir, int clientno)
     while (true)
     {
         cout << "getting lock" << endl;
-        while (m_lock.try_lock())
-            ;
 
+        m_lock.lock();
+        cout << "lock acquired" << endl;
+                
+        if (ticket == turn_global || ticket == p1.s1.get_connectedclients() + 1){
+            m_lock.unlock();
+            sleep (1);
+            continue;
+        }
         // cout << "Locked in client thread" << endl;
 
         // cout << "client Lock acquired..." << endl;
@@ -115,19 +171,58 @@ void client_thread(string destdir, int clientno)
 
             w1.updatelog(currLog);
             WriteFile(w1.rootdir + "Log.txt", &currLog);
-            ticket = (ticket + 1) % 3;
+            ticket = (ticket + 1) % (p1.s1.get_connectedclients() + 2);
             cout<<ticket<<" "<<turn_global<<endl;
-            m_lock.unlock();
             cout << "client lock unlocked" << endl;
+            m_lock.unlock();
         }
         else if (file == "empty")
         {
-            m_lock.unlock();
             cout << "client lock unlocked" << endl;
+            m_lock.unlock();
+            cout<<ticket<<" "<<turn_global<<endl;
             sleep(2);
+        }
+        else if (file == "broken"){
+            m_lock.unlock();
+            cout<<"connection broken" <<endl;
+            break;
+        }
+        else {
+            m_lock.unlock();
         }
     }
 };
+
+void initiate_connection(){
+    vector <thread> client_threads;
+    int ctr = 0;
+    vector <int> is_connected(foreign_hosts.size(), 0);
+    thread t1[10];
+    while (1){
+        m_lock.lock();
+        cout << "initiate lock acquired " << endl;
+        if (ticket == p1.s1.get_connectedclients() + 1){
+            for (int i=0; i<foreign_hosts.size(); i++){
+                if (is_connected[i]) continue;
+                    if (p1.initialise(i)){
+                        is_connected[i] = 1;
+                        ticket += 1;
+                        t1[ctr] = thread(client_thread, root_folder, ctr);
+                        ctr++;
+                        send_to_all = true;
+                    }
+            }
+            ticket = 0;
+        }
+        cout << "initiate lock released " << endl;
+        m_lock.unlock();
+        sleep(1);
+    }
+    for (int i=0; i<=ctr; i++){
+        t1[i].join();
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -138,27 +233,27 @@ int main(int argc, char *argv[])
     client_port2 = atoi(argv[4]);
     int turn = atoi(argv[5]); turn_global = turn;
 
-    vector<pair<char *, int>> foreign_hosts;
 
     foreign_hosts.push_back({(char *)"127.0.0.1", client_port1});
     foreign_hosts.push_back({(char *)"127.0.0.1", client_port2});
 
     // Initialize Server & Client!!
     p1 = p2p(serv_port, foreign_hosts);
-    p1.initialise();
+    //p1.initialise();
 
-    string root_folder = argv[1];
+    root_folder = argv[1];
     w1 = WatchDog(root_folder);
     cout << "Watchdog Ready" << endl;
 
     // |||||||||Call server add here|||||||||||||
     thread t1 = thread(server_thread, root_folder, foreign_hosts, serv_port, turn);
-    thread t2 = thread(client_thread, root_folder, 0);
-    thread t3 = thread(client_thread, root_folder, 1);
+    thread t2 = thread(initiate_connection);
+    //thread t2 = thread(client_thread, root_folder, 0);
+    //thread t3 = thread(client_thread, root_folder, 1);
 
     t1.join();
     t2.join();
-    t3.join();
+    //t3.join();
 
     return 0;
 };

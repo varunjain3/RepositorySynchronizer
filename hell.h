@@ -32,7 +32,7 @@ public:
     WatchDog() { ; }
     WatchDog(string path)
     {
-        this->Log = getLog(path);
+        this->Log;
         this->rootdir = path;
     }
 
@@ -175,8 +175,7 @@ public:
             string hash1, hash2;
             hash1 = gethash(src, itr->first);
             hash2 = gethash(dest, itr->first);
-            cout << endl
-                 << itr->first;
+            cout << itr->first << endl;
             if (hash1 != hash2)
             {
                 if (itr->second.folder == false)
