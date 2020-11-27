@@ -81,12 +81,3 @@ filemap ReadFile(string fname)
     fclose(fp);
     return m;
 }
-
-// int main()
-// {
-//     ifstream file_obj("Log.txt", ios::app);
-//     filemap obj;
-//     obj = ReadFile("Log.txt");
-//     cout << "Helloworld";
-//     return 0;
-// }

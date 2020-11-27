@@ -1,5 +1,5 @@
 #include <iostream>
-#include <string.h> //for std::string
+#include <string.h>
 #include <fstream>
 #include <map>
 #include <list>
@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/stat.h>
-#include "toolkit.h"
+#include "utils.h"
 #include "md5.h"
 #include "dfh.h"
 
@@ -36,6 +36,8 @@ public:
         this->rootdir = path;
     }
 
+    /////////////////////////////////////////////////////////////
+    //
     filepair initialize()
     {
         filemap empty;
@@ -43,31 +45,25 @@ public:
         return adds;
     }
 
+    /////////////////////////////////////////////////////////////
+    // A function to add new key-value pairs to the logs
     void addkeyvalue(filemap &newlog, string key, filestat value)
     {
         newlog.insert(fileobject(key, value));
     }
-    void addkey2self(string key, filestat value)
-    {
-        this->Log.insert(fileobject(key, value));
-    }
 
+    /////////////////////////////////////////////////////////////
+    // To retrieve the hash of the file from the log
     string gethash(filemap log, string key)
     {
         auto itr = log.find(key);
         if (itr == log.end())
-        {
-            // cout << "Key not found";
             return "NotFound";
-        }
         else
             return itr->second.hash;
     }
-
-    // To be done by harshit
-    // return a map of
     ////////////////////////////////////////////////////////////
-
+    // To check if the file is directory or not
     bool isdir(const char *name)
     {
         struct stat ps;
@@ -76,7 +72,7 @@ public:
 
         return S_ISDIR(ps.st_mode);
     }
-
+    ////////////////////////////////////////////////////////////
     // To file the file map with file objects
     void iterator(string path, filemap &log)
     {
@@ -85,6 +81,7 @@ public:
         string temp_path;
         filestat tempstat;
         folder = opendir(path.c_str());
+        // iterates for all the files in the folder
         while ((entity = readdir(folder)) != NULL)
         {
             if ((strcmp(entity->d_name, ".") != 0) && (strcmp(entity->d_name, "..") && strcmp(entity->d_name, "Log.txt")) != 0)
@@ -94,6 +91,7 @@ public:
 
                 if (isdir(temp_path.c_str()))
                 {
+                    //Makes a filestat if file exists
                     tempstat.folder = true;
                     tempstat.hash = "NULL";
                     iterator(temp_path, log);
@@ -101,63 +99,50 @@ public:
                 else
                 {
                     tempstat.folder = false;
-                    // cout << "\ninside hash checker- " << temp_path << endl;
                     tempstat.hash = md5_from_file(temp_path);
                 }
 
                 string new_path = temp_path.substr(temp_path.find("/", 0) + 2, temp_path.length());
-                cout << new_path << " " << tempstat.folder << "\t Hash- " << tempstat.hash << endl;
-
+                // Adds files to the log
                 addkeyvalue(log, new_path, tempstat);
             }
         }
     }
-
+    ///////////////////////////////////////////////////////////
     // Function to get the filemap of a root directory.
     filemap getLog(string path)
     {
         filemap newlog;
-        cout << endl
-             << "Getting Log for " << path << endl;
         iterator(path, newlog);
         return newlog;
     }
 
     ///////////////////////////////////////////////////////////
     // Add Files as per given src and destination
-    // bool copyFile(const char *SRC, const char *DEST)
-    // {
-    //     ifstream src(SRC, ios::binary);
-    //     ofstream dest(DEST, ios::binary);
-    //     dest << src.rdbuf();
-    //     return src && dest;
-    // }
-
     bool copyFile(string srcfolder, string destfolder, string filename)
     {
         string SRC = srcfolder + "/" + filename;
         string DEST = destfolder + "/" + filename;
 
         // Make Directories
-
         string parent = DEST.substr(0, DEST.find_last_of("/"));
         string command = "mkdir -p " + parent;
-        cout << "\nParent - " << parent << "\tCommand - " << (char *)command.c_str();
         system((char *)command.c_str());
 
         // Actuall Copying
         ifstream source(SRC, ios::binary);
         ofstream dest(DEST, ios::binary);
-
         istreambuf_iterator<char> begin_source(source);
         istreambuf_iterator<char> end_source;
         ostreambuf_iterator<char> begin_dest(dest);
         copy(begin_source, end_source, begin_dest);
 
+        // Closing files
         source.close();
         dest.close();
     }
 
+    ///////////////////////////////////////////////////////////
     // removes files as per given path
     bool delFile(string dest, string file)
     {
@@ -165,6 +150,9 @@ public:
         return (remove(path.c_str()) != 0) ? 0 : 1;
     }
 
+    ///////////////////////////////////////////////////////////
+    // A functino to compare to given filemap(log) to tell changes
+    // that are in src but not in dest
     filepair comparelog(filemap src, filemap dest)
     {
         filelist modified_files;
@@ -181,19 +169,22 @@ public:
                 if (itr->second.folder == false)
                     modified_files.push_back(itr->first);
                 else
-                {
                     modified_folders.push_back(itr->first);
-                }
             }
         }
         return make_pair(modified_files, modified_folders);
     }
 
+    ///////////////////////////////////////////////////////////
+    // Function to update the current log with the given log
     void updatelog(filemap log)
     {
         this->Log = log;
     }
 
+    ///////////////////////////////////////////////////////////
+    // A function to add the log.txt file in the list that is to be
+    // sent to the server
     void addlogtolist(filepair &adds, filemap log)
     {
         filelist addfiles = adds.first;
@@ -204,7 +195,8 @@ public:
 
         adds = make_pair(addfiles, adds.second);
     }
-
+    ///////////////////////////////////////////////////////////
+    // To check if there are new changes in the current folder
     filepair checkchanges()
     {
         filemap currlog;
@@ -213,17 +205,8 @@ public:
         filepair adds = this->comparelog(currlog, this->Log);
         filepair dells = this->comparelog(this->Log, currlog);
 
-        // if (adds.first.size() != 0 || adds.second.size() != 0 || dells.first.size() != 0)
         addlogtolist(adds, currlog);
         this->updatelog(currlog);
         return adds;
     }
 };
-
-// To check if the Maps are same or not.
-template <typename Map>
-bool key_compare(Map const &lhs, Map const &rhs)
-{
-    return lhs.size() == rhs.size() && std::equal(lhs.begin(), lhs.end(), rhs.begin(),
-                                                  [](auto a, auto b) { return a.first == b.first; });
-}

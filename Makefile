@@ -7,13 +7,8 @@ all: binaries
 
 
 binaries: final.cpp
-<<<<<<< HEAD
 	g++ -g -o final final.cpp md5.cpp -lpthread
-	rm test1/* test2/* test3/*
-=======
-	g++ -g -o final final.cpp md5.cpp toolkit.cpp -lpthread
-	rm test1/* test2/* test3/* test4/*
->>>>>>> 9b6c8f823f396db78cb5d4d8c4ed6148f0c15794
+	rm -r test1/* test2/* test3/*
 	touch test1/file1.txt
 	touch test2/file2.txt
 	touch test3/file3.txt
