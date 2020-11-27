@@ -5,8 +5,8 @@
 #include <mutex>
 #include <thread>
 #include <vector>
-#include "utils.h"
 
+#include "utils.h"
 #include "WatchDog.h"
 #include "file_transfer.h"
 
