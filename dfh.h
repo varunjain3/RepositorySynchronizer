@@ -16,6 +16,8 @@ struct filestat
 typedef map<string, filestat> filemap;
 typedef pair<string, filestat> fileobject;
 
+/////////////////////////////////////////////////////////////
+// Function to write the log file in txt to send to other clients
 int WriteFile(string fname, filemap *m)
 {
     int count = 0;
@@ -36,6 +38,8 @@ int WriteFile(string fname, filemap *m)
     return count;
 }
 
+/////////////////////////////////////////////////////////////
+// Function to read the log file sent as text file
 filemap ReadFile(string fname)
 {
     int count = 0;

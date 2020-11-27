@@ -9,7 +9,6 @@
 #include <sys/stat.h>
 #include "utils.h"
 #include "md5.h"
-#include "dfh.h"
 
 using namespace std;
 
@@ -37,7 +36,7 @@ public:
     }
 
     /////////////////////////////////////////////////////////////
-    //
+    // To initialize the wathdog instance
     filepair initialize()
     {
         filemap empty;
