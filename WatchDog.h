@@ -1,3 +1,10 @@
+/*
+This is the watchdog class that make sure that any changes that are 
+made in a folder are properly noticed and accounted. It also keeps
+maintained a copy of the filemap in the folder at all times and notifies
+the server to send any changes observed to the client.
+*/
+
 #include <iostream>
 #include <string.h>
 #include <fstream>
