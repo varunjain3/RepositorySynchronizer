@@ -1,3 +1,12 @@
+/*
+We use a Peer-2-Peer architecture for handling the file
+transfers involved during synchronization.
+Here each node acts both as a server,
+and a client.
+
+This is the Client-Side of the P2P --->
+*/
+
 #ifndef p2p_client
 #define p2p_client
 
@@ -20,6 +29,8 @@
     }
 using namespace std;
 
+// Server class (Exists for each host)
+
 class client
 {
 
@@ -30,12 +41,15 @@ private:
     int sock;
 
 public:
+    // Constructor, will initialize the client-side of the P2P
+
     client() { ; }
 
     client(char *ip, int port)
     {
         serv_port = port;
         serv_ip = ip;
+        // Creating Socket
         sock = socket(AF_INET, SOCK_STREAM, 0); // 0 defaults to TCP using SOCK_STREAM
         if (sock < 0)
             PR("socket failed");
@@ -62,6 +76,9 @@ public:
     ~client() { ; }
 };
 
+/////////////////////////////////////////////////////////////
+    // Client instance sends the connection request to other host Servers
+    
 int client::connect2server()
 {
     //while (1)
@@ -78,6 +95,9 @@ int client::connect2server()
     //}
     return 1;
 }
+
+/////////////////////////////////////////////////////////////
+    // To receive file from other hosts
 
 string client::receive_data(char *save_folder)
 {
@@ -113,6 +133,7 @@ string client::receive_data(char *save_folder)
     FileSize = atoi(strtok(NULL, "|"));
     cout << "filepath - " << filepath << " " << FileSize << endl;
 
+    // Adding Root folder details to Filepath
     char filepath_temp[1024];
     strcpy(filepath_temp, save_folder);
     strcat(filepath_temp, filepath);
@@ -128,6 +149,7 @@ string client::receive_data(char *save_folder)
     unsigned int rec_len = 0;
     FILE *fp = fopen(filepath, "w");
 
+    // Receiving data in the form of packets
     while (rec_len < FileSize)
     {
         char buffer[BUFSIZE + 1];

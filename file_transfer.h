@@ -1,3 +1,12 @@
+/*
+We use a Peer-2-Peer architecture for handling the file
+transfers involved during synchronization.
+Here each node acts both as a server,
+and a client.
+This is the main P2P class that further uses 
+Server and Client classes for each Host --->
+*/
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -20,6 +29,8 @@
 
 int serv_port, client_port1, client_port2, client_port3;
 
+// P2P class Handles File Transfers (Exists for each host)
+
 class p2p
 {
 
@@ -32,11 +43,14 @@ public:
     server s1;
     client c1[5];
 
+    // Constructor, will initialize the P2P
+
     p2p() { ; }
 
     p2p(int serv_port, vector<pair<char *, int>> foreign_hosts)
     {
-        num_foreign_hosts = foreign_hosts.size();
+        num_foreign_hosts = foreign_hosts.size(); // All the other Hosts
+        // Server Initialized
         s1 = server(serv_port);
         for (int i = 0; i < foreign_hosts.size(); i++)
         {
@@ -44,6 +58,8 @@ public:
         }
     }
 
+    /////////////////////////////////////////////////////////////
+    // [Only for Debugging] Trash function: Used to test the working of P2P without Watchdog
     void file_to_transfer(char *file1, char *file2)
     {
         strcpy(filepath1, "books/");
@@ -51,6 +67,8 @@ public:
         strcpy(save_folder, file2);
     }
 
+    /////////////////////////////////////////////////////////////
+    // To initialize the P2P instance
     int initialise(int index)
     {
         if (c1[index].connect2server()==0) {
@@ -63,6 +81,8 @@ public:
         return 1; //if everything worked smoothly
     }
 
+    /////////////////////////////////////////////////////////////
+    // To send the files in addlist to all the other hosts
     void server_filelist(string rootdir, filelist addlist)
     {
         cout << "starting file transfer..." << endl;

@@ -1,3 +1,12 @@
+/*
+We use a Peer-2-Peer architecture for handling the file
+transfers involved during synchronization.
+Here each node acts both as a server,
+and a client.
+
+This is the Server-Side of the P2P --->
+*/
+
 #include <vector>
 #include <string>
 #include <string.h>
@@ -18,12 +27,15 @@
     }
 using namespace std;
 
+// Struct to store the details of each client node.
 struct client_details
 {
     int client_sock;
     sockaddr_in client_addr;
     socklen_t client_addr_len;
 };
+
+// Server class (Exists for each host)
 
 class server
 {
@@ -36,13 +48,16 @@ private:
     vector<client_details> connected_clients;
 
 public:
+
+    // Constructor, will initialize the server-side of the P2P
+
     server() { ; }
 
     server(int port)
     {
 
         serv_port = port;
-        serv_socket = socket(AF_INET, SOCK_STREAM, 0);
+        serv_socket = socket(AF_INET, SOCK_STREAM, 0); // Creates Socket 
         if (serv_socket < 0)
         {
             PR("socket error");
@@ -70,6 +85,8 @@ public:
         }
     }
 
+    // Utility functions of the Server Class
+
     void accept_connection();
 
     void checkonline();
@@ -85,6 +102,9 @@ public:
         //close (serv_socket);
     }
 };
+
+/////////////////////////////////////////////////////////////
+    // Server instance accepts the connection from the other host clients
 
 void server::accept_connection()
 {
@@ -122,6 +142,9 @@ void server::accept_connection()
     //}
 }
 
+/////////////////////////////////////////////////////////////
+    // Server checks the connectivity status of the all other hosts
+
 void server::checkonline(){
     char msg[1024];
     strcpy(msg, "AYT");
@@ -133,12 +156,16 @@ void server::checkonline(){
     return;
 }
 
+/////////////////////////////////////////////////////////////
+    // To send the files flagged by the watchdog to all the connected clients
+
 void server::send_file(char *rootfolder, char *filepath)
 {
 
     int BUFSIZE = 1024;
     char buffer[BUFSIZE + 1];
-
+    
+    // Adding Root folder details to Filepath
     char filepath_root[1024];
     strcpy(filepath_root, rootfolder);
     strcat(filepath_root, filepath);
@@ -162,6 +189,7 @@ void server::send_file(char *rootfolder, char *filepath)
         FILE *fp = fopen(filepath_root, "r");
         memset(buffer, 0, sizeof(buffer));
 
+        // Sending the data in the form of packets
         while (!feof(fp)){
             int read_bytes = fread(buffer, 1, BUFSIZE, fp); //fgets didn't work for images, idky
             cout<<"Debug 1"<<endl;
@@ -196,6 +224,9 @@ void server::send_file(char *rootfolder, char *filepath)
     for (int i = 0; i < 1; i++) //DEBUGGING PURPOSES
         cout << "Send finished" << endl;
 }
+
+/////////////////////////////////////////////////////////////
+    // Checks if the file transfer was flawless
 
 int server::check_correctsend(int num_bytes_sent, int buffer_len, int index)
 {
