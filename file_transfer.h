@@ -18,7 +18,7 @@
         exit(EXIT_FAILURE); \
     }
 
-int serv_port, client_port1, client_port2;
+int serv_port, client_port1, client_port2, client_port3;
 
 class p2p
 {
@@ -51,15 +51,16 @@ public:
         strcpy(save_folder, file2);
     }
 
-    void initialise()
+    int initialise(int index)
     {
-        for (int i = 0; i < num_foreign_hosts; i++)
-        {
-            c1[i].connect2server();
-            cout << "client initialized...";
+        if (c1[index].connect2server()==0) {
+            return 0;
         }
+        cout << "client initialized...";
         s1.accept_connection();
         cout << "server accepted";
+
+        return 1; //if everything worked smoothly
     }
 
     void server_filelist(string rootdir, filelist addlist)
@@ -71,6 +72,10 @@ public:
             cout << "server sent file" << endl;
         }
         cout << "returning from server file list..." << endl;
+    }
+
+    void checkonline(){
+        s1.checkonline();
     }
 
     ~p2p() { ; }

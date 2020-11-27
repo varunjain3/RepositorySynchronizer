@@ -8,13 +8,15 @@ all: binaries
 
 binaries: final.cpp
 	g++ -g -o final final.cpp md5.cpp toolkit.cpp -lpthread
-	rm test1/* test2/* test3/*
+	rm test1/* test2/* test3/* test4/*
 	touch test1/file1.txt
 	touch test2/file2.txt
 	touch test3/file3.txt
+	touch test4/file4.txt
 	echo "I am text1" > test1/file1.txt
 	echo "I am text2" > test2/file2.txt
 	echo "I am text3" > test3/file3.txt
+	echo "I am text4" > test4/file4.txt
 
 	# ./final 10001 10000 $(folder1) &
 	# ./final 10000 10001 $(folder2) &

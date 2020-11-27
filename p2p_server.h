@@ -72,6 +72,8 @@ public:
 
     void accept_connection();
 
+    void checkonline();
+
     void send_file(char *, char *);
 
     int check_correctsend(int, int, int);
@@ -120,6 +122,17 @@ void server::accept_connection()
     //}
 }
 
+void server::checkonline(){
+    char msg[1024];
+    strcpy(msg, "AYT");
+    int num_bytes_sent = 0;
+    for (int i=0; i<connected_clients.size(); i++){
+        num_bytes_sent = send(connected_clients[i].client_sock, msg, 1024, MSG_NOSIGNAL);
+        check_correctsend (num_bytes_sent, 1024, i); 
+    }
+    return;
+}
+
 void server::send_file(char *rootfolder, char *filepath)
 {
 
@@ -154,7 +167,10 @@ void server::send_file(char *rootfolder, char *filepath)
             cout<<"Debug 1"<<endl;
             num_bytes_sent = send(connected_clients[i].client_sock, buffer, read_bytes, MSG_NOSIGNAL);
             cout<<"Sending in progress..."<<endl;
-            if (check_correctsend(num_bytes_sent, read_bytes, i) == 0) break;
+            if (check_correctsend(num_bytes_sent, read_bytes, i) == 0) {
+                i-=1;
+                break;
+            }
 
             memset(buffer, 0, sizeof(buffer));
         }
@@ -188,6 +204,7 @@ int server::check_correctsend(int num_bytes_sent, int buffer_len, int index)
     {
         perror("send error");
         connected_clients.erase(connected_clients.begin() + index);
+        is_connected[index] = 0;
         return 0;
     }
     else if (num_bytes_sent != buffer_len)

@@ -3,9 +3,11 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 using namespace std;
 
+vector <int> is_connected;
 //Works well on linux (stackoverflow had an answer about tellg giving slightly less filesize in windows)
 int get_filesize(char * filename){
     ifstream input(filename, ios::binary);
