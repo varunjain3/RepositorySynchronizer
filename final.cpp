@@ -4,6 +4,8 @@
 #include <map>
 #include <mutex>
 #include <thread>
+#include <vector>
+#include "utils.h"
 
 #include "hell.h"
 #include "file_transfer.h"
@@ -75,19 +77,19 @@ start:
         cout << "Watchdog Changes calculated..." << endl;
 
         // If connection broken
-        if (p1.s1.get_connectedclients() == 0)
-        {
-            m_lock.unlock();
-            sleep(2);
-            //p1.initialise();
-            goto start;
-        }
+        //if (p1.s1.get_connectedclients() == 0)
+        //{
+            //m_lock.unlock();
+            //sleep(2);
+            ////p1.initialise();
+            //goto start;
+        //}
         if (send_to_all && turn == 0)
         {
             filelist addfilelist_temp;
             for (auto itr = w1.Log.begin(); itr!=w1.Log.end(); itr++)
             {
-                if (itr->second.folder == false)
+                if (itr->second.folder == false && itr->first!="Log.txt")
                 {
                     addfilelist_temp.push_back((*itr).first);
                 }
@@ -104,8 +106,8 @@ start:
         cout << "back to watchdog after sleep" << endl;
         ticket = (ticket + 1) % (p1.s1.get_connectedclients() + 2);
         cout << "server lock released" << endl;
-        m_lock.unlock();
         sleep(2);
+        m_lock.unlock();
     }
 }
 
@@ -114,12 +116,13 @@ void client_thread(string destdir, int clientno)
 
     while (true)
     {
-        cout << "getting lock" << endl;
 
         m_lock.lock();
-        cout << "lock acquired" << endl;
+        cout << "client lock acquired" << endl;
                 
         if (ticket == turn_global || ticket == p1.s1.get_connectedclients() + 1){
+            cout<<ticket<<" "<<turn_global<<endl;
+            cout<< "client lock unlocked" << endl;
             m_lock.unlock();
             sleep (1);
             continue;
@@ -184,11 +187,17 @@ void client_thread(string destdir, int clientno)
             sleep(2);
         }
         else if (file == "broken"){
+            //cerr<<"broken"<<endl;
+            //cerr<<"ticket "<<ticket<<" "<<"turn "<<turn_global<<endl;
+            //ticket = (ticket + 1) % (p1.s1.get_connectedclients() + 2);
+            p1.checkonline();
+            cout << "client lock unlocked" << endl;
             m_lock.unlock();
             cout<<"connection broken" <<endl;
             break;
         }
         else {
+            cout << "client lock unlocked" << endl;
             m_lock.unlock();
         }
     }
@@ -197,14 +206,14 @@ void client_thread(string destdir, int clientno)
 void initiate_connection(){
     vector <thread> client_threads;
     int ctr = 0;
-    vector <int> is_connected(foreign_hosts.size(), 0);
     thread t1[10];
     while (1){
         m_lock.lock();
+        p1.checkonline();
         cout << "initiate lock acquired " << endl;
-        if (ticket == p1.s1.get_connectedclients() + 1){
+        if (ticket >= p1.s1.get_connectedclients() + 1){
             for (int i=0; i<foreign_hosts.size(); i++){
-                if (is_connected[i]) continue;
+                //if (is_connected[i]) continue;
                     if (p1.initialise(i)){
                         is_connected[i] = 1;
                         ticket += 1;
@@ -231,12 +240,14 @@ int main(int argc, char *argv[])
 
     client_port1 = atoi(argv[3]);
     client_port2 = atoi(argv[4]);
-    int turn = atoi(argv[5]); turn_global = turn;
+    client_port3 = atoi(argv[5]);
+    int turn = atoi(argv[6]); turn_global = turn;
 
 
     foreign_hosts.push_back({(char *)"127.0.0.1", client_port1});
     foreign_hosts.push_back({(char *)"127.0.0.1", client_port2});
-
+    foreign_hosts.push_back({(char *)"127.0.0.1", client_port3});
+    is_connected.assign(foreign_hosts.size(), 0);
     // Initialize Server & Client!!
     p1 = p2p(serv_port, foreign_hosts);
     //p1.initialise();

@@ -86,7 +86,12 @@ string client::receive_data(char *save_folder)
     int BUFSIZE = 1024, num_bytes = 0, FileSize = 0;
     char *filepath, file_desc[1024];
 
-    num_bytes = recv(sock, file_desc, 1024, MSG_DONTWAIT);
+    memset(file_desc, '\0', sizeof(file_desc));
+    do{
+        memset(file_desc, '\0', sizeof(file_desc));
+        num_bytes = recv(sock, file_desc, 1024, MSG_DONTWAIT);
+    }   while (strcmp(file_desc, "AYT")==0);
+
     if (num_bytes < 0)
     {
         // perror("recv error");
