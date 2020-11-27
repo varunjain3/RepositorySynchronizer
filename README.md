@@ -1,6 +1,6 @@
 ## RepositorySynchornizer
 
-This repository is a part of our Operating Systems Course Project, and was colaboratively made by [Harsh Patel](https://github.com/Harshp1802), [Harshit Kumar](https://github.com/harshitkumar825), [Shivam Sahani](https://github.com/shivam15s) and [Me(Varun)](https://github.com/varunjain3).
+This repository is a part of our Operating Systems Course Project, and was colaboratively made by [Harsh Patel](https://github.com/Harshp1802), [Harshit Kumar](https://github.com/harshitkumar825), [Shivam Sahani](https://github.com/shivam15s) and [Me(Varun Jain)](https://github.com/varunjain3).
 
 ---
 
@@ -50,15 +50,21 @@ Some objectives that we had while making the software-
 
 ### Mirroring (File Backup)
 
-<div style="text-align:center"><img src="extra/databackup.png" /></div>
+<p align="center">
+  <img width="500" src="extra/databackup.png">
+</p>
 
 ### Home - Work Collaboration
 
-<div style="text-align:center"><img src="extra/homeoffice.png" /></div>
+<p align="center">
+  <img width="500" src="extra/homeoffice.png">
+</p>
 
 ### Team Collaboration
 
-<div style="text-align:center"><img src="extra/teamcolab.png" /></div>
+<p align="center">
+  <img width="500" src="extra/teamcolab.png">
+</p>
 
 ---
 
@@ -81,11 +87,15 @@ The 2 major parts of the code are the WatchDog and the P2P File Transferer.
 
 The Watchdog is a class with the following utitlities -
 
-<div style="text-align:center"><img src="extra/watchdog.png" /></div>
+<p align="center">
+  <img width="500" src="extra/watchdog.png">
+</p>
 
 The P2P file is a dervied class and contains the Client and Server Classes, The following diagram explians it in more detail-
 
-<div style="text-align:center"><img src="extra/p2p.png" /></div>
+<p align="center">
+  <img width="500" src="extra/p2p.png">
+</p>
 
 ---
 
