@@ -228,7 +228,7 @@ void initiate_connection()
         {
             for (int i = 0; i < foreign_hosts.size(); i++)
             {
-                //if (is_connected[i]) continue;
+                if (is_connected[i]) continue;
                 if (p1.initialise(i))
                 {
                     is_connected[i] = 1;

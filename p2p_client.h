@@ -81,18 +81,18 @@ public:
     
 int client::connect2server()
 {
-    //while (1)
-    //{
+    while (1)
+    {
         int t1 = connect(sock, (sockaddr *)&serv_addr, sizeof(serv_addr));
         if (t1 < 0)
         {
             perror("connect error");
-            return 0;
-            //sleep(1);
+            //return 0;
+            sleep(1);
         }
-        //else
-            //break;
-    //}
+        else
+            break;
+    }
     return 1;
 }
 
