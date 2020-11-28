@@ -8,7 +8,7 @@ all: binaries
 
 binaries: final.cpp
 	g++ -g -o final final.cpp md5.cpp -lpthread
-	rm -r test1/* test2/* test3/*
+	rm -r test1/* test2/* test3/* test4/*
 	touch test1/file1.txt
 	touch test2/file2.txt
 	touch test3/file3.txt
