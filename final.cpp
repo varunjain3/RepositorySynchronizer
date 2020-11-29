@@ -129,20 +129,21 @@ start:
 Handles the client threads
 */
 
-void client_thread(string destdir, int clientno)
+void client_thread(string destdir, int clientno, int own_ticket)
 {
-
+    bool lk = false;
     while (true)
     {
-
-        m_lock.lock();
+        if (!lk)
+            m_lock.lock();
         cout << "client lock acquired" << endl;
 
         //Checks if its turn to receive
-        if (ticket == turn_global || ticket == p1.s1.get_connectedclients() + 1)
+        if (ticket != own_ticket)
         {
             cout << ticket << " " << turn_global << endl;
             cout << "client lock unlocked" << endl;
+            lk = false;
             m_lock.unlock();
             sleep(1);
             continue;
@@ -207,11 +208,13 @@ void client_thread(string destdir, int clientno)
             ticket = (ticket + 1) % (p1.s1.get_connectedclients() + 2);
             cout << ticket << " " << turn_global << endl;
             cout << "client lock unlocked" << endl;
+            lk = false;
             m_lock.unlock();
         }
         else if (file == "empty") //If nothing received
         {
             cout << "client lock unlocked" << endl;
+            lk = false;
             m_lock.unlock();
             cout << ticket << " " << turn_global << endl;
             sleep(2);
@@ -223,6 +226,7 @@ void client_thread(string destdir, int clientno)
             //ticket = (ticket + 1) % (p1.s1.get_connectedclients() + 2);
             p1.checkonline();
             cout << "client lock unlocked" << endl;
+            lk = false;
             m_lock.unlock();
             cout << "connection broken" << endl;
             break;
@@ -230,7 +234,8 @@ void client_thread(string destdir, int clientno)
         else //We are receiving files
         {
             cout << "client lock unlocked" << endl;
-            m_lock.unlock();
+            lk = true;
+            //m_lock.unlock();
         }
     }
 };
@@ -253,6 +258,7 @@ void initiate_connection()
         cout << "initiate lock acquired " << endl;
         if (ticket >= p1.s1.get_connectedclients() + 1)
         {
+            bool ins_t = false;
             for (int i = 0; i < foreign_hosts.size(); i++)
             {
                 if (is_connected[i]) continue;
@@ -260,9 +266,18 @@ void initiate_connection()
                 {
                     is_connected[i] = 1;
                     ticket += 1;
-                    t1[ctr] = thread(client_thread, root_folder, ctr);
+                    //t1[ctr] = thread(client_thread, root_folder, ctr);
                     ctr++;
                     send_to_all = true;
+                    ins_t = true;
+                }
+            }
+            if (ins_t){
+                int start = 0;
+                for (int i=0; i < foreign_hosts.size(); i++){
+                    if (start == turn_global) start += 1;
+                    t1[i] = thread(client_thread, root_folder, i, start);
+                    start += 1;
                 }
             }
             ticket = 0;

@@ -17,16 +17,29 @@ binaries: final.cpp
 	echo "I am text2" > test2/file2.txt
 	echo "I am text3" > test3/file3.txt
 	echo "I am text4" > test4/file4.txt
+	
+p1:
+	./final test1/ 10000 10002 10004 10006 0 
 
-	# ./final 10001 10000 $(folder1) &
-	# ./final 10000 10001 $(folder2) &
-	# ./final 10002 10003 $(folder2) &
-	# ./final 10003 10002 $(folder3) &
-	# ./final 10004 10005 $(folder3) &
-	# ./final 10005 10004 $(folder4) &
-	# ./final 10006 10007 $(folder4) &
-	# ./final 10007 10006 $(folder1) &
-	# ./final 10008 10009 $(folder4) &
-	# ./final 10009 10008 $(folder2) &
-	# ./final 10010 10011 $(folder3) &
-	# ./final 10011 10010 $(folder1) &
+p2: 
+	./final test2/ 10002 10000 10004 10006 1 
+
+p3:
+	./final test3/ 10004 10000 10002 10006 2 
+
+p4:
+	./final test4/ 10006 10000 10002 10004 3
+
+
+clean:
+	rm final
+
+#------------------------------------------------
+#p1:
+	#./final test1/ 10000 10002 10004 0 
+
+#p2: 
+	#./final test2/ 10002 10000 10004 1 
+
+#p3:
+	#./final test3/ 10004 10000 10002 2 
