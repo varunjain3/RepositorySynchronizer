@@ -1,6 +1,6 @@
 ## RepositorySynchornizer
 
-This repository is a part of our Operating Systems Course Project, and was colaboratively made by [Harsh Patel](https://github.com/Harshp1802), [Harshit Kumar](https://github.com/harshitkumar825), [Shivam Sahani](https://github.com/shivam15s) and [Me(Varun Jain)](https://github.com/varunjain3).
+This repository is a part of our Operating Systems Course Project, and was colaboratively made by [Harsh Patel](https://github.com/Harshp1802), [Harshit Kumar](https://github.com/harshitkumar825), [Shivam Sahni](https://github.com/shivam15s) and [Me(Varun Jain)](https://github.com/varunjain3).
 
 ---
 
